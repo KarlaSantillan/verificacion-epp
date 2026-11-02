@@ -41,6 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    "usuarios",
+    "configuracion",
+    "estudiantes",
+    "verificacion",
+    "seguimiento",
+    "auditoria",
 ]
 
 MIDDLEWARE = [
@@ -133,3 +139,10 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+AUTH_USER_MODEL = "usuarios.Usuario"
+DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+
+# RNF01: la sesión expira tras 30 minutos sin actividad
+SESSION_COOKIE_AGE = 1800
+SESSION_SAVE_EVERY_REQUEST = True
