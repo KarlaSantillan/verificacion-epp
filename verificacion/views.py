@@ -29,6 +29,8 @@ def identificar(request):
         return JsonResponse({"ok": False, "estado": "qr_no_valido", "mensaje": str(error)}, status=400)
 
     carnet = resultado.carnet
+    if carnet is None:  # el SGA indicó que el carné no es válido
+        return JsonResponse({"ok": False, "estado": resultado.estado, "mensaje": resultado.mensaje})
     estudiante = carnet.estudiante
     return JsonResponse(
         {

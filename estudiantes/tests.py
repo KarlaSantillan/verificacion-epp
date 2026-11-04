@@ -17,7 +17,7 @@ QR_VALIDO = "https://sga.unemi.edu.ec/p_valida_carnet/digital?code=TEST0001"
 CLAVE = "ClaveSegura-2026"
 
 
-@override_settings(QR_HASH_KEY="clave-solo-para-pruebas")
+@override_settings(QR_HASH_KEY="clave-solo-para-pruebas", SGA_CONSULTA_ACTIVA=False)
 class IdentificacionQRTests(TestCase):
     @classmethod
     def setUpTestData(cls):

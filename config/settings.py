@@ -156,3 +156,6 @@ LOGIN_REDIRECT_URL = "core:inicio"
 LOGOUT_REDIRECT_URL = "usuarios:login"
 
 QR_HASH_KEY = os.getenv("QR_HASH_KEY")
+
+SGA_CONSULTA_ACTIVA = True
+SGA_TIEMPO_ESPERA = 3  # segundos

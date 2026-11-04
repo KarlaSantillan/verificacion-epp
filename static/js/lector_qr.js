@@ -14,6 +14,7 @@
     pendiente: "aviso aviso-warn",
     inactivo: "aviso aviso-error",
     vencido: "aviso aviso-error",
+    no_valido_sga: "aviso aviso-error",
     qr_no_valido: "aviso aviso-error",
     error: "aviso aviso-error",
   };
