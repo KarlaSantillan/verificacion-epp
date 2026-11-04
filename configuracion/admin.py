@@ -8,6 +8,7 @@ class LaboratorioEppInline(admin.TabularInline):
 
     model = LaboratorioEpp
     extra = 0
+    can_delete = False
     fields = ["epp", "obligatorio", "confianza_minima", "activo"]
 
 
@@ -17,12 +18,16 @@ class LaboratorioAdmin(admin.ModelAdmin):
     list_filter = ["activo"]
     inlines = [LaboratorioEppInline]
 
+    def has_delete_permission(self, request, obj=None):
+        return False  # Se desactivan con la casilla "Activo", no se eliminan.
 
 @admin.register(Epp)
 class EppAdmin(admin.ModelAdmin):
     list_display = ["nombre", "clase_modelo", "activo"]
     list_filter = ["activo"]
-
+    
+    def has_delete_permission(self, request, obj=None):
+        return False  # Se desactivan con la casilla "Activo", no se eliminan.
 
 @admin.register(PeriodoAcademico)
 class PeriodoAcademicoAdmin(admin.ModelAdmin):
