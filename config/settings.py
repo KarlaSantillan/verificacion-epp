@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "verificacion",
     "seguimiento",
     "auditoria",
+    "core",
 ]
 
 MIDDLEWARE = [
@@ -64,13 +65,14 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        "DIRS": [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "core.context_processors.menu",
             ],
         },
     },
@@ -146,3 +148,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # RNF01: la sesión expira tras 30 minutos sin actividad
 SESSION_COOKIE_AGE = 1800
 SESSION_SAVE_EVERY_REQUEST = True
+
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+LOGIN_URL = "usuarios:login"
+LOGIN_REDIRECT_URL = "core:inicio"
+LOGOUT_REDIRECT_URL = "usuarios:login"

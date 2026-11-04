@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<div class="mb-4">
+  <h1 class="fs-3 fw-semibold text-heading mb-1">Hola, {{ user.nombres }}</h1>
+  <p class="text-muted-epp mb-0">Has ingresado como <strong>{{ rol_etiqueta }}</strong>.</p>
+</div>
+
+<div class="row g-3">
+  <div class="col-sm-6 col-xl-3">
+    <div class="tarjeta p-3 h-100 d-flex gap-3 align-items-center">
+      <span class="icono"><i class="bi bi-building"></i></span>
+      <div><div class="small text-muted-epp">Laboratorios activos</div><div class="fs-4 fw-semibold">{{ laboratorios_activos }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="tarjeta p-3 h-100 d-flex gap-3 align-items-center">
+      <span class="icono"><i class="bi bi-shield-check"></i></span>
+      <div><div class="small text-muted-epp">EPP en el catálogo</div><div class="fs-4 fw-semibold">{{ epp_activos }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="tarjeta p-3 h-100 d-flex gap-3 align-items-center">
+      <span class="icono"><i class="bi bi-calendar3"></i></span>
+      <div><div class="small text-muted-epp">Periodo actual</div><div class="fw-semibold">{{ periodo_actual|default:"Sin periodo vigente" }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="tarjeta p-3 h-100 d-flex gap-3 align-items-center">
+      <span class="icono"><i class="bi bi-cpu"></i></span>
+      <div><div class="small text-muted-epp">Modelo de visión</div><div class="fw-semibold">{{ modelo_activo|default:"Pendiente de entrenamiento" }}</div></div>
+    </div>
+  </div>
+</div>
+
+{% if not modelo_activo %}
+  <div class="aviso aviso-warn mt-4 d-flex gap-2">
+    <i class="bi bi-exclamation-triangle"></i>
+    <div>La verificación en vivo estará disponible cuando se registre un modelo de visión activo.</div>
+  </div>
+{% endif %}
+{% endblock %}

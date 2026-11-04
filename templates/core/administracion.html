@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titulo %}Administración{% endblock %}
+
+{% block contenido %}
+<h1 class="fs-3 fw-semibold text-heading mb-1">Administración</h1>
+<p class="text-muted-epp">Configuración del sistema. Solo visible para el rol Administrador.</p>
+
+<div class="row g-3">
+  {% for item in menu_administracion %}
+    <div class="col-sm-6 col-xl-3">
+      <a class="tarjeta p-3 h-100 d-flex gap-3 align-items-center text-decoration-none text-reset" href="{{ item.url }}">
+        <span class="icono"><i class="bi bi-{{ item.icono }}"></i></span>
+        <span class="fw-semibold">{{ item.nombre }}</span>
+      </a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
