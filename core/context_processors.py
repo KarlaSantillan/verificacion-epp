@@ -3,8 +3,7 @@ from django.urls import NoReverseMatch, reverse
 # (nombre, icono de Bootstrap Icons, nombre de la URL). None = pantalla aún no construida.
 MENU_OPERACION = [
     ("Inicio", "grid-1x2", "core:inicio"),
-    ("Verificación en vivo", "camera-video", None),  # HU02/HU06 (Leo)
-    ("Registros", "journal-text", None),  # HU10
+    ("Verificación en vivo", "camera-video", "verificacion:verificar"),  # HU02/HU06 (Leo)    ("Registros", "journal-text", None),  # HU10
     ("Incidencias", "exclamation-triangle", None),  # HU10 / HU15
     ("Ayuda", "question-circle", None),
 ]

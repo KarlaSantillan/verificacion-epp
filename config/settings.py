@@ -154,3 +154,5 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 LOGIN_URL = "usuarios:login"
 LOGIN_REDIRECT_URL = "core:inicio"
 LOGOUT_REDIRECT_URL = "usuarios:login"
+
+QR_HASH_KEY = os.getenv("QR_HASH_KEY")
