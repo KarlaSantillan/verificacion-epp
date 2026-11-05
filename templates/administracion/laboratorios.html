@@ -1,0 +1,35 @@
+{% extends "administracion/_base.html" %}
+{% load admin_epp %}
+{% block titulo %}Laboratorios{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Laboratorios</h1><p>Requisitos EPP y umbrales independientes por laboratorio.</p></div>
+  <a href="{% url 'administracion:laboratorio_nuevo' %}" class="btn btn-epp px-3"><i class="bi bi-plus-lg me-1"></i>Nuevo laboratorio</a>
+</div>
+
+<div class="row g-3">
+  {% for lab in laboratorios %}
+  <div class="col-md-6 col-xl-4">
+    <div class="tarjeta-lab">
+      <div class="d-flex justify-content-between align-items-start">
+        <span class="icono-cuadro"><i class="bi bi-building"></i></span>
+        <div class="d-flex align-items-center gap-2">{% estado lab.activo %}{% interruptor "laboratorio" lab.id_laboratorio lab.activo lab.nombre %}</div>
+      </div>
+      <h2 class="fs-5 fw-semibold text-heading mt-3 mb-1">{{ lab.nombre }}</h2>
+      <p class="small text-muted-epp mb-0"><i class="bi bi-geo-alt"></i> {{ lab.ubicacion|default:"Ubicación no disponible" }}</p>
+      <div class="d-flex align-items-center gap-2 mt-3 mb-3 flex-wrap">
+        {% for req in lab.obligatorios %}<span class="epp-circulo" title="{{ req.epp.nombre }} · mín. {{ req.confianza_minima|porcentaje }}">{% epp_icono req.epp.clase_modelo 20 %}</span>{% endfor %}
+        <span class="small fw-semibold text-heading ms-1">{{ lab.obligatorios|length }} EPP requeridos</span>
+      </div>
+      {% if not lab.obligatorios %}<div class="aviso aviso-warn small mb-3">Sin EPP obligatorios: no se puede usar en la verificación.</div>{% endif %}
+      <div class="pie">
+        <span class="small text-muted-epp">Estabilización {{ lab.tiempo_estabilizacion_segundos }} s</span>
+        <a href="{% url 'administracion:laboratorio_editar' lab.id_laboratorio %}" class="btn btn-epp-outline btn-sm px-3"><i class="bi bi-sliders me-1"></i>Configurar</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="aviso aviso-info">Todavía no hay laboratorios registrados.</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -9,16 +9,15 @@ MENU_OPERACION = [
     ("Ayuda", "question-circle", None),
 ]
 
-# Por ahora la administración usa el panel de Django (HU12, HU13, HU17).
 MENU_ADMINISTRACION = [
-    ("Laboratorios", "building", "admin:configuracion_laboratorio_changelist"),
-    ("Catálogo EPP", "shield-check", "admin:configuracion_epp_changelist"),
-    ("Estudiantes y carnés", "person-vcard", "admin:estudiantes_estudiante_changelist"),
-    ("Usuarios y roles", "people", "admin:usuarios_usuario_changelist"),
-    ("Periodos académicos", "calendar3", "admin:configuracion_periodoacademico_changelist"),
-    ("Parámetros generales", "sliders", "admin:configuracion_parametro_changelist"),
-    ("Modelo de visión", "cpu", "admin:configuracion_modelovision_changelist"),
-    ("Auditoría", "clipboard2-pulse", "admin:auditoria_auditoria_changelist"),
+    ("Laboratorios", "building", "administracion:laboratorios"),
+    ("Catálogo EPP", "shield-check", "administracion:catalogo"),
+    ("Estudiantes y carnés", "person-vcard", "administracion:estudiantes"),
+    ("Usuarios y roles", "people", "administracion:usuarios"),
+    ("Periodos académicos", "calendar3", "administracion:periodos"),
+    ("Parámetros generales", "sliders", "administracion:parametros"),
+    ("Modelo de visión", "cpu", "administracion:modelos"),
+    ("Auditoría", "clipboard2-pulse", "admin:auditoria_auditoria_changelist"),  # HU17
 ]
 
 

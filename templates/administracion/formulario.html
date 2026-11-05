@@ -1,0 +1,17 @@
+{% extends "administracion/_base.html" %}
+{% comment %}Base de los formularios simples. Las plantillas hijas definen: encabezado, volver_url, volver_texto y, si quieren, extra.{% endcomment %}
+{% block titulo %}{% block encabezado %}{% endblock %}{% endblock %}
+{% block contenido %}
+<a href="{% block volver_url %}{% endblock %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> {% block volver_texto %}{% endblock %}</a>
+<div class="encabezado-pagina mt-2"><div><h1>{% block encabezado2 %}{% endblock %}</h1>{% block subtitulo %}{% endblock %}</div></div>
+<form method="post" novalidate class="tarjeta p-3 p-md-4" style="max-width: 760px">
+  {% csrf_token %}
+  {% block antes %}{% endblock %}
+  {% include "administracion/_campos.html" with form=form %}
+  <div class="d-flex gap-2 justify-content-end mt-4">
+    <a href="{% block cancelar_url %}{% endblock %}" class="btn btn-epp-outline px-4">Cancelar</a>
+    <button type="submit" class="btn btn-epp px-4">Guardar</button>
+  </div>
+</form>
+{% block extra %}{% endblock %}
+{% endblock %}

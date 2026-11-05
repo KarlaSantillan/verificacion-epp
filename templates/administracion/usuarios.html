@@ -1,0 +1,28 @@
+{% extends "administracion/_base.html" %}
+{% load admin_epp %}
+{% block titulo %}Usuarios y roles{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Usuarios y roles</h1><p>Cuentas autorizadas de docentes/encargados y administradores.</p></div>
+  <a href="{% url 'administracion:usuario_nuevo' %}" class="btn btn-epp px-3"><i class="bi bi-plus-lg me-1"></i>Nuevo usuario</a>
+</div>
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Nombres</th><th>Apellidos</th><th>Correo</th><th>Rol</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for u in usuarios %}
+      <tr>
+        <td class="principal">{{ u.nombres }}</td>
+        <td>{{ u.apellidos }}</td>
+        <td class="text-muted-epp">{{ u.correo }}</td>
+        <td>{{ u.rol }}</td>
+        <td><div class="d-flex align-items-center gap-2">
+          {% if u == request.user %}<span class="small text-muted-epp">(usted)</span>{% else %}{% interruptor "usuario" u.id_usuario u.activo u.correo %}{% endif %}{% estado u.activo %}
+        </div></td>
+        <td class="text-end"><a href="{% url 'administracion:usuario_editar' u.id_usuario %}" class="btn btn-sm btn-link text-decoration-none"><i class="bi bi-pencil-square"></i> Editar</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

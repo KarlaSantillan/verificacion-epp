@@ -1,0 +1,6 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}{% if epp %}Editar EPP{% else %}Nuevo EPP{% endif %}{% endblock %}
+{% block encabezado2 %}{% if epp %}Editar · {{ epp.nombre }}{% else %}Nuevo EPP{% endif %}{% endblock %}
+{% block volver_url %}{% url 'administracion:catalogo' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:catalogo' %}{% endblock %}
+{% block volver_texto %}Catálogo EPP{% endblock %}

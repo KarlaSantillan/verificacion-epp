@@ -1,0 +1,26 @@
+{% extends "administracion/_base.html" %}
+{% load admin_epp %}
+{% block titulo %}Catálogo EPP{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Catálogo EPP</h1><p>Un EPP solo es verificable si existe una clase compatible en el modelo.</p></div>
+  <a href="{% url 'administracion:epp_nuevo' %}" class="btn btn-epp px-3"><i class="bi bi-plus-lg me-1"></i>Nuevo EPP</a>
+</div>
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th></th><th>Nombre</th><th>Clase del modelo</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for epp in epps %}
+      <tr>
+        <td class="text-primary" style="width: 48px">{% epp_icono epp.clase_modelo 24 %}</td>
+        <td class="principal">{{ epp.nombre }}</td>
+        <td><code>{{ epp.clase_modelo }}</code></td>
+        <td class="text-muted-epp">{{ epp.descripcion|default:"—" }}</td>
+        <td><div class="d-flex align-items-center gap-2">{% interruptor "epp" epp.id_epp epp.activo epp.nombre %}{% estado epp.activo %}</div></td>
+        <td class="text-end"><a href="{% url 'administracion:epp_editar' epp.id_epp %}" class="btn btn-sm btn-link text-decoration-none"><i class="bi bi-pencil-square"></i> Editar</a></td>
+      </tr>
+      {% empty %}<tr><td colspan="6" class="text-center text-muted-epp py-4">No hay EPP registrados.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

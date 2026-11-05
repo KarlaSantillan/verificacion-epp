@@ -1,0 +1,67 @@
+{% extends "administracion/_base.html" %}
+{% load admin_epp %}
+{% block titulo %}Estudiantes y carnés{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Estudiantes y carnés</h1><p>Los estudiantes se crean al leer su carné en la verificación. Aquí se consultan, corrigen y desactivan.</p></div>
+  {% if pendientes %}<a href="{% url 'estudiantes:pendientes' %}" class="btn btn-epp-outline px-3"><i class="bi bi-hourglass-split me-1"></i>{{ pendientes }} carné{{ pendientes|pluralize }} pendiente{{ pendientes|pluralize }}</a>{% endif %}
+</div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+  <nav class="pestanas" role="tablist">
+    <a href="?tab=estudiantes" class="{% if pestana == 'estudiantes' %}activa{% endif %}" role="tab" aria-selected="{% if pestana == 'estudiantes' %}true{% else %}false{% endif %}"><i class="bi bi-person"></i> Estudiantes</a>
+    <a href="?tab=carnes" class="{% if pestana == 'carnes' %}activa{% endif %}" role="tab" aria-selected="{% if pestana == 'carnes' %}true{% else %}false{% endif %}"><i class="bi bi-person-vcard"></i> Carnés</a>
+  </nav>
+  <form method="get" class="d-flex gap-2" style="min-width: 280px">
+    <input type="hidden" name="tab" value="{{ pestana }}">
+    <input type="search" name="q" value="{{ busqueda }}" class="form-control" placeholder="{% if pestana == 'carnes' %}Buscar por código o nombre{% else %}Buscar por nombre o cédula{% endif %}" aria-label="Buscar">
+    <button class="btn btn-epp-outline px-3" type="submit"><i class="bi bi-search"></i></button>
+  </form>
+</div>
+
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+  {% if pestana == "estudiantes" %}
+    <thead><tr><th>Nombres</th><th>Apellidos</th><th>Cédula</th><th>Carrera</th><th>Nivel</th><th>Carnés</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for e in pagina %}
+      <tr>
+        <td class="principal">{{ e.nombres|default:"" }}{% if not e.nombres %}<span class="no-disponible">Pendiente</span>{% endif %}</td>
+        <td>{{ e.apellidos|default:"" }}</td>
+        <td>{% if e.cedula %}{{ e.cedula|slice:":2" }}••••••{{ e.cedula|slice:"-2:" }}{% else %}<span class="no-disponible">Dato no disponible</span>{% endif %}</td>
+        <td>{{ e.carrera|default:"—" }}</td>
+        <td>{{ e.nivel|default:"—" }}</td>
+        <td>{{ e.total_carnes }}</td>
+        <td><div class="d-flex align-items-center gap-2">{% interruptor "estudiante" e.id_estudiante e.activo e %}{% estado e.activo %}</div></td>
+        <td class="text-end"><a href="{% url 'administracion:estudiante_editar' e.id_estudiante %}" class="btn btn-sm btn-link text-decoration-none"><i class="bi bi-pencil-square"></i> Editar</a></td>
+      </tr>
+      {% empty %}<tr><td colspan="8" class="text-center text-muted-epp py-4">No hay estudiantes{% if busqueda %} que coincidan con la búsqueda{% endif %}.</td></tr>{% endfor %}
+    </tbody>
+  {% else %}
+    <thead><tr><th>Código</th><th>Estudiante</th><th>Estado de registro</th><th>Vigencia</th><th>Registrado por</th><th>Estado</th></tr></thead>
+    <tbody>
+      {% for c in pagina %}
+      <tr>
+        <td><code>{{ c.codigo_validacion|default:"—" }}</code></td>
+        <td class="principal"><a href="{% url 'administracion:estudiante_editar' c.estudiante_id %}" class="text-decoration-none">{{ c.estudiante }}</a></td>
+        <td>{% if c.estado_registro == "pendiente" %}<span class="text-primary"><i class="bi bi-hourglass-split"></i> Pendiente</span>{% else %}{{ c.get_estado_registro_display }}{% endif %}</td>
+        <td>{% if c.fecha_fin_vigencia %}{{ c.fecha_inicio_vigencia|date:"d/m/Y"|default:"…" }} → {{ c.fecha_fin_vigencia|date:"d/m/Y" }}{% else %}<span class="no-disponible">Dato no disponible</span>{% endif %}</td>
+        <td>{{ c.usuario_registro.nombres }} {{ c.usuario_registro.apellidos }}</td>
+        <td><div class="d-flex align-items-center gap-2">{% interruptor "carnet" c.id_carnet c.activo c.codigo_validacion %}{% estado c.activo %}</div></td>
+      </tr>
+      {% empty %}<tr><td colspan="6" class="text-center text-muted-epp py-4">No hay carnés{% if busqueda %} que coincidan con la búsqueda{% endif %}.</td></tr>{% endfor %}
+    </tbody>
+  {% endif %}
+  </table>
+</div>
+
+{% if pagina.paginator.num_pages > 1 %}
+<nav class="d-flex justify-content-between align-items-center mt-3 small">
+  <span class="text-muted-epp">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }} · {{ pagina.paginator.count }} registros</span>
+  <div class="d-flex gap-2">
+    {% if pagina.has_previous %}<a class="btn btn-sm btn-epp-outline" href="?tab={{ pestana }}&q={{ busqueda|urlencode }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    {% if pagina.has_next %}<a class="btn btn-sm btn-epp-outline" href="?tab={{ pestana }}&q={{ busqueda|urlencode }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+  </div>
+</nav>
+{% endif %}
+{% endblock %}

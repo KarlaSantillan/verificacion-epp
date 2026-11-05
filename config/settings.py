@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "seguimiento",
     "auditoria",
     "core",
+    "administracion",
 ]
 
 MIDDLEWARE = [

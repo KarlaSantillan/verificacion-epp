@@ -1,0 +1,7 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}Editar parámetro{% endblock %}
+{% block encabezado2 %}Editar parámetro{% endblock %}
+{% block subtitulo %}<p><code class="fw-semibold">{{ parametro.clave }}</code> · {{ parametro.descripcion|default:"" }}</p>{% endblock %}
+{% block volver_url %}{% url 'administracion:parametros' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:parametros' %}{% endblock %}
+{% block volver_texto %}Parámetros generales{% endblock %}

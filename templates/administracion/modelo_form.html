@@ -1,0 +1,7 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}{% if modelo %}Editar modelo{% else %}Registrar modelo{% endif %}{% endblock %}
+{% block encabezado2 %}{% if modelo %}Editar · {{ modelo }}{% else %}Registrar modelo de visión{% endif %}{% endblock %}
+{% block subtitulo %}<p>{% if not modelo %}El modelo se registra inactivo. Actívelo desde la lista cuando su archivo esté en la carpeta <code>modelos</code>.{% endif %}</p>{% endblock %}
+{% block volver_url %}{% url 'administracion:modelos' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:modelos' %}{% endblock %}
+{% block volver_texto %}Modelo de visión{% endblock %}

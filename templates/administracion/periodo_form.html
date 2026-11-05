@@ -1,0 +1,6 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}Editar periodo{% endblock %}
+{% block encabezado2 %}Editar · {{ periodo.nombre }}{% endblock %}
+{% block volver_url %}{% url 'administracion:periodos' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:periodos' %}{% endblock %}
+{% block volver_texto %}Periodos académicos{% endblock %}

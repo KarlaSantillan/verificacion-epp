@@ -1,0 +1,38 @@
+{% extends "administracion/_base.html" %}
+{% load admin_epp %}
+{% block titulo %}Modelo de visión{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div><h1>Modelo de visión</h1><p>Solo un modelo puede estar activo. Cada validación conserva el modelo con el que se realizó.</p></div>
+  <a href="{% url 'administracion:modelo_nuevo' %}" class="btn btn-epp px-3"><i class="bi bi-plus-lg me-1"></i>Registrar modelo</a>
+</div>
+<div class="row g-3">
+  {% for m in modelos %}
+  <div class="col-lg-6">
+    <div class="tarjeta p-3 p-md-4 ficha h-100">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <span class="icono-cuadro"><i class="bi bi-cpu"></i></span>
+        <div class="flex-grow-1"><div class="fs-5 fw-semibold text-heading">{{ m.nombre }} {{ m.version }}</div>{% estado m.activo "Modelo activo" "Inactivo" %}</div>
+      </div>
+      <dl class="mb-3">
+        <div><dt>Versión</dt><dd>{{ m.version }}</dd></div>
+        <div><dt>Dataset de entrenamiento</dt><dd>{{ m.dataset_entrenamiento|default:"—" }}</dd></div>
+        <div><dt>Fecha de entrenamiento</dt><dd>{{ m.fecha_entrenamiento|date:"d/m/Y"|default:"—" }}</dd></div>
+        <div><dt>Archivo</dt><dd><code>{{ m.archivo }}</code> {% if m.archivo_existe %}<i class="bi bi-check-circle text-success" title="Encontrado"></i>{% else %}<span class="small text-danger"><i class="bi bi-exclamation-triangle"></i> No encontrado</span>{% endif %}</dd></div>
+      </dl>
+      <div class="d-flex gap-2 justify-content-end">
+        <a href="{% url 'administracion:modelo_editar' m.id_modelo %}" class="btn btn-sm btn-link text-decoration-none"><i class="bi bi-pencil-square"></i> Editar</a>
+        {% if not m.activo %}
+        <form method="post" action="{% url 'administracion:modelo_activar' m.id_modelo %}">{% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-epp px-3"{% if not m.archivo_existe %} disabled title="Falta el archivo del modelo"{% endif %}><i class="bi bi-lightning-charge me-1"></i>Activar</button>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12"><div class="aviso aviso-warn">No hay modelos registrados. La verificación en vivo no funcionará hasta registrar y activar uno.</div></div>
+  {% endfor %}
+</div>
+<div class="aviso aviso-info mt-4"><i class="bi bi-info-circle me-1"></i>Precisión, recall y mAP pertenecen a la evaluación técnica del modelo (TK06 / TK12) y se reportan en el documento.</div>
+{% endblock %}

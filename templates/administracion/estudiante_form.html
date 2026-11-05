@@ -1,0 +1,14 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}Editar estudiante{% endblock %}
+{% block encabezado2 %}Editar · {{ estudiante }}{% endblock %}
+{% block volver_url %}{% url 'administracion:estudiantes' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:estudiantes' %}{% endblock %}
+{% block volver_texto %}Estudiantes y carnés{% endblock %}
+{% block extra %}
+<div class="tarjeta p-3 p-md-4 mt-3" style="max-width: 760px">
+  <h2 class="fs-6 fw-semibold text-heading mb-2">Carnés del estudiante</h2>
+  {% for c in carnets %}
+    <div class="d-flex justify-content-between small py-1 border-bottom"><code>{{ c.codigo_validacion|default:"—" }}</code><span>{{ c.get_estado_registro_display }}{% if c.fecha_fin_vigencia %} · vence {{ c.fecha_fin_vigencia|date:"d/m/Y" }}{% endif %}</span></div>
+  {% empty %}<p class="small text-muted-epp mb-0">Sin carnés.</p>{% endfor %}
+</div>
+{% endblock %}

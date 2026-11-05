@@ -1,0 +1,6 @@
+{% extends "administracion/formulario.html" %}
+{% block encabezado %}{% if usuario %}Editar usuario{% else %}Nuevo usuario{% endif %}{% endblock %}
+{% block encabezado2 %}{% if usuario %}Editar · {{ usuario.nombres }} {{ usuario.apellidos }}{% else %}Nuevo usuario autorizado{% endif %}{% endblock %}
+{% block volver_url %}{% url 'administracion:usuarios' %}{% endblock %}
+{% block cancelar_url %}{% url 'administracion:usuarios' %}{% endblock %}
+{% block volver_texto %}Usuarios y roles{% endblock %}

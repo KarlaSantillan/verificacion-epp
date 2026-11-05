@@ -1,0 +1,21 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Parámetros generales{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina"><div><h1>Parámetros generales</h1><p>Valores globales que controlan reincidencias y lectura de carnés.</p></div></div>
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Clave</th><th>Valor</th><th>Descripción</th><th>Última actualización</th><th></th></tr></thead>
+    <tbody>
+      {% for p in parametros %}
+      <tr>
+        <td><code class="fw-semibold">{{ p.clave }}</code></td>
+        <td class="principal text-break">{{ p.valor }}</td>
+        <td class="text-muted-epp">{{ p.descripcion|default:"—" }}</td>
+        <td class="text-nowrap">{{ p.fecha_actualizacion|date:"d/m/Y H:i" }}</td>
+        <td class="text-end"><a href="{% url 'administracion:parametro_editar' p.id_parametro %}" class="btn btn-sm btn-link text-decoration-none"><i class="bi bi-pencil-square"></i> Editar</a></td>
+      </tr>
+      {% empty %}<tr><td colspan="5" class="text-center text-muted-epp py-4">No hay parámetros. Ejecute <code>python manage.py cargar_datos_iniciales</code>.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

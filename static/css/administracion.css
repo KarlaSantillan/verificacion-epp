@@ -1,0 +1,42 @@
+/* Pantallas de administración (HU12 / HU13) – estilo del prototipo de Figma */
+.encabezado-pagina { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem; }
+.encabezado-pagina h1 { font-size: 1.75rem; font-weight: 600; color: var(--epp-ink); margin: 0 0 .25rem; }
+.encabezado-pagina p { color: var(--epp-muted); margin: 0; }
+
+.tabla-epp { border: 1px solid var(--epp-neutral); border-radius: 14px; overflow: hidden; box-shadow: 0 4px 18px rgba(28, 50, 71, .07); background: #fff; }
+.tabla-epp table { margin: 0; font-size: .9rem; }
+.tabla-epp thead th { background: var(--epp-soft); color: var(--epp-primary); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; font-weight: 600; padding: .8rem 1rem; border: 0; }
+.tabla-epp tbody td { padding: .75rem 1rem; vertical-align: middle; border-color: var(--epp-neutral); }
+.tabla-epp tbody tr:hover td { background: var(--epp-soft); }
+.tabla-epp .principal { font-weight: 600; color: var(--epp-ink); }
+.tabla-epp code { background: var(--epp-soft); color: var(--epp-primary); padding: .1rem .4rem; border-radius: 6px; font-size: .78rem; }
+.no-disponible { font-style: italic; color: var(--epp-muted); }
+
+.estado { display: inline-flex; align-items: center; gap: .3rem; border-radius: 999px; padding: .15rem .65rem; font-size: .75rem; font-weight: 600; border: 1px solid var(--epp-neutral); color: var(--epp-muted); white-space: nowrap; }
+.estado.on { background: var(--epp-accent-soft); color: var(--epp-primary); border-color: rgba(251, 126, 0, .6); }
+
+.interruptor { position: relative; width: 44px; height: 24px; border-radius: 999px; border: 1px solid rgba(28, 50, 71, .4); background: rgba(214, 223, 232, .6); padding: 0; vertical-align: middle; transition: background .15s; }
+.interruptor span { position: absolute; top: 3px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; }
+.interruptor.on { background: var(--epp-primary); border-color: var(--epp-primary); }
+.interruptor.on span { left: 23px; }
+
+.tarjeta-lab { border: 1px solid var(--epp-neutral); border-radius: 14px; padding: 1.25rem; background: #fff; box-shadow: 0 4px 18px rgba(28, 50, 71, .07); height: 100%; display: flex; flex-direction: column; }
+.icono-cuadro { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; background: var(--epp-accent-soft); color: var(--epp-primary); font-size: 1.25rem; }
+.epp-circulo { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--epp-soft); color: var(--epp-primary); border: 1px solid var(--epp-neutral); }
+.tarjeta-lab .pie { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--epp-neutral); display: flex; justify-content: space-between; align-items: center; }
+
+.fila-requisito { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding: .75rem; border: 1px solid var(--epp-neutral); border-radius: 10px; }
+.fila-requisito + .fila-requisito { margin-top: .5rem; }
+.fila-requisito .nombre { flex: 1; min-width: 7rem; font-weight: 600; color: var(--epp-ink); }
+.fila-requisito .form-check-label { font-size: .8rem; color: var(--epp-primary); }
+.fila-requisito .confianza { width: 5.5rem; }
+
+.pestanas { display: inline-flex; border: 1px solid var(--epp-neutral); border-radius: 12px; padding: 4px; margin-bottom: 1.25rem; }
+.pestanas a { padding: .5rem 1rem; border-radius: 9px; font-size: .9rem; font-weight: 500; color: var(--epp-primary); text-decoration: none; }
+.pestanas a.activa { background: var(--epp-accent-soft); color: var(--epp-ink); box-shadow: inset 0 0 0 1px var(--epp-accent); }
+
+.ficha dl > div { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid var(--epp-neutral); font-size: .9rem; }
+.ficha dl > div:last-child { border-bottom: 0; }
+.ficha dt { color: var(--epp-muted); font-weight: 400; }
+.ficha dd { margin: 0; font-weight: 500; color: var(--epp-ink); }
+.form-switch .form-check-input:checked { background-color: var(--epp-primary); border-color: var(--epp-primary); }
