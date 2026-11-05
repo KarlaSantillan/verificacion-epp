@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from decimal import Decimal
 
 from django.db import models
@@ -71,7 +72,11 @@ class LaboratorioEpp(models.Model):
     laboratorio = models.ForeignKey(Laboratorio, on_delete=models.PROTECT, db_column="id_laboratorio", related_name="requisitos")
     epp = models.ForeignKey(Epp, on_delete=models.PROTECT, db_column="id_epp", related_name="requisitos")
     obligatorio = models.BooleanField(default=True)
-    confianza_minima = models.DecimalField(max_digits=5, decimal_places=4, default=Decimal("0.80"))
+    confianza_minima = models.DecimalField(
+        max_digits=5, decimal_places=4, default=Decimal("0.80"),
+        validators=[MinValueValidator(Decimal("0")), MaxValueValidator(Decimal("1"))],
+        help_text="Valor entre 0 y 1. Ejemplo: 0.85 equivale a 85 % de confianza.",
+    )
     activo = models.BooleanField(default=True)
 
     class Meta:

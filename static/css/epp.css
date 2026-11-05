@@ -1,0 +1,105 @@
+/* Tokens de diseño tomados del prototipo de Figma */
+:root {
+  --epp-primary: #1c3247;
+  --epp-primary-hover: #12222f;
+  --epp-ink: #14212d;
+  --epp-muted: #4e6275;
+  --epp-neutral: #d6dfe8;
+  --epp-soft: #f1f5f8;
+  --epp-accent: #fb7e00;
+  --epp-accent-soft: #fff1e0;
+  --epp-ok: #15803d;
+  --epp-bad: #b91c1c;
+  --epp-bad-soft: #fef2f2;
+  --epp-warn: #92400e;
+  --epp-warn-soft: #fffbeb;
+  --epp-sidebar-w: 240px;
+  --bs-body-font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --bs-body-color: var(--epp-ink);
+  --bs-border-radius: 10px;
+}
+
+body { background: #fff; color: var(--epp-ink); }
+.text-muted-epp { color: var(--epp-muted) !important; }
+.text-heading { color: var(--epp-ink); }
+
+:focus-visible { outline: 2px solid var(--epp-primary); outline-offset: 2px; box-shadow: 0 0 0 5px rgba(251, 126, 0, .3); }
+
+/* Botones */
+.btn-epp { background: var(--epp-primary); color: #fff; border: 0; border-radius: 10px; font-weight: 600; min-height: 44px; }
+.btn-epp:hover, .btn-epp:focus { background: var(--epp-primary-hover); color: #fff; }
+.btn-epp:disabled { background: var(--epp-neutral); color: rgba(28, 50, 71, .6); }
+.btn-epp-outline { background: #fff; color: var(--epp-primary); border: 1px solid var(--epp-primary); border-radius: 10px; font-weight: 600; }
+.btn-epp-outline:hover { background: var(--epp-accent-soft); color: var(--epp-primary); }
+
+.form-control { border-color: var(--epp-primary); border-radius: 10px; }
+.form-control:focus { border-color: var(--epp-primary); box-shadow: 0 0 0 .2rem rgba(251, 126, 0, .25); }
+.form-label { font-weight: 600; color: var(--epp-ink); }
+
+/* Marca */
+.brand-logo { position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--epp-primary); color: #fff; font-size: 1.25rem; flex-shrink: 0; }
+.brand-logo::after { content: ""; position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; border-radius: 50%; background: var(--epp-accent); box-shadow: 0 0 0 2px #fff; }
+.brand-title { font-weight: 600; line-height: 1.2; }
+.brand-sub { font-size: .75rem; color: var(--epp-muted); }
+
+/* Inicio de sesión */
+.login-aside { border-right: 1px solid var(--epp-neutral); }
+.login-panel { max-width: 420px; }
+
+/* Menú lateral */
+.sidebar { width: var(--epp-sidebar-w); border-right: 1px solid var(--epp-neutral); background: #fff !important; } /* !important: Bootstrap deja transparente el offcanvas en escritorio */
+@media (min-width: 992px) {
+  .sidebar { position: fixed; top: 0; bottom: 0; left: 0; }
+  .contenido { padding-left: var(--epp-sidebar-w); }
+}
+.sidebar .menu-titulo { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--epp-muted); padding: 0 .75rem; margin-bottom: .25rem; }
+.sidebar .menu-link { position: relative; display: flex; align-items: center; gap: .75rem; min-height: 36px; padding: .375rem .75rem; border-radius: 10px; color: var(--epp-primary); font-size: .875rem; font-weight: 500; text-decoration: none; }
+.sidebar .menu-link:hover { background: var(--epp-soft); }
+.sidebar .menu-link.activo { background: var(--epp-accent-soft); color: var(--epp-ink); }
+.sidebar .menu-link.activo::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 3px; border-radius: 3px; background: var(--epp-accent); }
+.sidebar .menu-link.pendiente { color: rgba(28, 50, 71, .45); cursor: default; }
+.sidebar .menu-link .badge-pronto { margin-left: auto; font-size: 10px; font-weight: 600; color: var(--epp-muted); background: var(--epp-soft); border-radius: 999px; padding: 1px 6px; }
+.sidebar .pie { border-top: 1px solid var(--epp-neutral); }
+
+/* Variante oscura para el administrador */
+.sidebar.sidebar-admin { background: var(--epp-primary) !important; border-color: var(--epp-primary); }
+.sidebar-admin .brand-title { color: #fff; }
+.sidebar-admin .brand-sub, .sidebar-admin .menu-titulo { color: rgba(255, 255, 255, .6); }
+.sidebar-admin .menu-titulo.admin { color: var(--epp-accent); }
+.sidebar-admin .brand-logo { background: var(--epp-accent); color: var(--epp-primary); }
+.sidebar-admin .brand-logo::after { background: #fff; box-shadow: 0 0 0 2px var(--epp-primary); }
+.sidebar-admin .menu-link { color: rgba(255, 255, 255, .78); }
+.sidebar-admin .menu-link:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+.sidebar-admin .menu-link.activo { background: rgba(255, 255, 255, .12); color: #fff; }
+.sidebar-admin .menu-link.pendiente { color: rgba(255, 255, 255, .35); }
+.sidebar-admin .menu-link .badge-pronto { background: rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .7); }
+.sidebar-admin .pie { border-color: rgba(255, 255, 255, .15); }
+.sidebar-admin .pie .nombre { color: #fff; }
+.sidebar-admin .pie .rol { color: rgba(255, 255, 255, .65); }
+.sidebar-admin .pie .btn-salir { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .4); }
+.sidebar-admin .pie .btn-salir:hover { background: rgba(255, 255, 255, .1); }
+
+.avatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--epp-accent-soft); color: var(--epp-primary); font-weight: 700; font-size: .8rem; flex-shrink: 0; }
+
+/* Barra superior */
+.barra-superior { position: sticky; top: 0; z-index: 1020; height: 64px; border-top: 4px solid var(--epp-accent); border-bottom: 1px solid var(--epp-neutral); background: rgba(255, 255, 255, .95); backdrop-filter: blur(6px); }
+.barra-superior.admin { border-top-color: var(--epp-primary); }
+.badge-rol { font-size: .75rem; font-weight: 700; border-radius: 999px; padding: .25rem .75rem; background: var(--epp-accent); color: var(--epp-primary); }
+.badge-rol.admin { background: var(--epp-primary); color: #fff; }
+
+/* Tarjetas */
+.tarjeta { border: 1px solid var(--epp-neutral); border-radius: 14px; box-shadow: 0 4px 18px rgba(28, 50, 71, .07); background: #fff; }
+.tarjeta .icono { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--epp-soft); color: var(--epp-primary); font-size: 1.2rem; }
+.aviso { border-radius: 12px; padding: .75rem 1rem; }
+.aviso-error { background: var(--epp-bad-soft); color: var(--epp-bad); border: 1px solid rgba(185, 28, 28, .25); }
+.aviso-info { background: var(--epp-soft); color: var(--epp-primary); border: 1px solid var(--epp-neutral); }
+.aviso-warn { background: var(--epp-warn-soft); color: var(--epp-warn); border: 1px solid rgba(146, 64, 14, .25); }
+
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+/* Menú lateral: se puede desplazar, pero sin mostrar la barra */
+.sidebar nav { scrollbar-width: none; }
+.sidebar nav::-webkit-scrollbar { display: none; }
+
+/* Texto del rol en el pie del menú */
+.sidebar .pie .rol { color: var(--epp-muted); }
