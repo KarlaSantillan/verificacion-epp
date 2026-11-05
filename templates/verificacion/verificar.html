@@ -2,13 +2,45 @@
 {% load static %}
 {% block titulo %}Verificación en vivo{% endblock %}
 
-{% block contenido %}
-<h1 class="fs-3 fw-semibold text-heading mb-1">Verificación en vivo</h1>
-<p class="text-muted-epp">Paso 1: el estudiante muestra el código QR de su carné a la cámara.</p>
+{% block estilos %}
+<style>
+  .video-deteccion { position: relative; background: #0f1b26; border-radius: 12px; overflow: hidden; min-height: 280px; }
+  .video-deteccion video { display: block; width: 100%; height: auto; }
+  .video-deteccion canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .video-deteccion .vacio { position: absolute; inset: 0; display: grid; place-items: center; color: #c9d4de; text-align: center; padding: 1rem; }
+  .estado-epp { display: flex; align-items: center; justify-content: space-between; gap: .75rem; padding: .6rem .75rem; border: 1px solid var(--epp-neutral); border-radius: 10px; }
+  .estado-epp + .estado-epp { margin-top: .5rem; }
+  .estado-epp .marca { font-weight: 600; font-size: .85rem; white-space: nowrap; }
+  .estado-epp.detectado { border-color: rgba(21, 128, 61, .4); background: #f0fdf4; }
+  .estado-epp.detectado .marca { color: var(--epp-ok); }
+  .estado-epp.pendiente .marca { color: var(--epp-muted); }
+  .paso { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--epp-primary); color: #fff; font-size: .8rem; font-weight: 700; margin-right: .4rem; }
+</style>
+{% endblock %}
 
-<div class="row g-3">
+{% block contenido %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3">
+  <div>
+    <h1 class="fs-3 fw-semibold text-heading mb-1">Verificación en vivo</h1>
+    <p class="text-muted-epp mb-0">Identifique al estudiante y luego verifique sus EPP frente a la cámara.</p>
+  </div>
+  <div style="min-width: 240px">
+    <label for="laboratorio" class="form-label small mb-1">Laboratorio</label>
+    <select id="laboratorio" class="form-select">
+      {% for laboratorio in laboratorios %}<option value="{{ laboratorio.id }}">{{ laboratorio.nombre }}</option>{% empty %}<option value="">Sin laboratorios activos</option>{% endfor %}
+    </select>
+  </div>
+</div>
+
+{% if not modelo_activo %}
+<div class="aviso aviso-warn mb-3"><i class="bi bi-exclamation-triangle me-1"></i>No hay un modelo de visión activo. La detección de EPP no estará disponible hasta registrarlo en el panel.</div>
+{% endif %}
+
+<!-- Paso 1: identificación (HU02 / HU03) -->
+<div id="pasoIdentificacion" class="row g-3">
   <div class="col-lg-7">
     <div class="tarjeta p-3">
+      <h2 class="fs-6 fw-semibold mb-3"><span class="paso">1</span>Identificación con el carné</h2>
       <div id="lector" class="rounded-3 overflow-hidden bg-light" style="min-height: 280px"></div>
       <div class="d-flex gap-2 mt-3">
         <button id="btnIniciar" type="button" class="btn btn-epp px-3"><i class="bi bi-camera-video me-1"></i>Iniciar cámara</button>
@@ -35,6 +67,36 @@
     <div class="tarjeta p-3 h-100" aria-live="polite">
       <h2 class="fs-5 fw-semibold mb-3">Estudiante</h2>
       <div id="resultado" class="text-muted-epp">Esperando la lectura del código QR…</div>
+      <button id="btnVerificarEpp" type="button" class="btn btn-epp w-100 mt-3" disabled>
+        <i class="bi bi-shield-check me-1"></i>Continuar con la verificación de EPP
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 2: detección de EPP en vivo (HU06) -->
+<div id="pasoDeteccion" class="row g-3 d-none">
+  <div class="col-lg-8">
+    <div class="tarjeta p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fs-6 fw-semibold mb-0"><span class="paso">2</span>Detección de EPP en vivo</h2>
+        <span id="velocidad" class="small text-muted-epp"></span>
+      </div>
+      <div class="video-deteccion">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="lienzo"></canvas>
+        <div id="videoVacio" class="vacio">Iniciando la cámara…</div>
+      </div>
+      <div id="mensajeDeteccion" class="mt-3" aria-live="polite"></div>
+      <p class="small text-muted-epp mt-2 mb-0">Ubíquese a 1–1,5 m de la cámara, de la cintura hacia arriba, y muestre las manos.</p>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="tarjeta p-3 h-100">
+      <h2 class="fs-5 fw-semibold mb-1">EPP requeridos</h2>
+      <p id="estudianteDeteccion" class="small text-muted-epp mb-3"></p>
+      <div id="listaEpp"></div>
+      <button id="btnTerminar" type="button" class="btn btn-epp-outline w-100 mt-3"><i class="bi bi-arrow-left me-1"></i>Siguiente estudiante</button>
     </div>
   </div>
 </div>
@@ -42,11 +104,15 @@
 
 {% block scripts %}
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+{{ laboratorios|json_script:"datos-laboratorios" }}
+{{ nombres_epp|json_script:"nombres-epp" }}
 <script>
   window.EPP = {
     urlIdentificar: "{% url 'verificacion:identificar' %}",
+    urlDetectar: "{% url 'verificacion:detectar' %}",
     csrf: "{{ csrf_token }}",
   };
 </script>
-  <script src="{% static 'js/lector_qr.js' %}?v=2"></script>
+<script src="{% static 'js/lector_qr.js' %}?v=3"></script>
+<script src="{% static 'js/deteccion_epp.js' %}?v=1"></script>
 {% endblock %}

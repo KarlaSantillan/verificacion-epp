@@ -1,8 +1,8 @@
 """Servicio de detección de EPP en tiempo real (TK07 / RF05, RNF03, RNF10).
-
+ 
 Recibe un fotograma (JPEG) de la cámara, ejecuta el modelo YOLOv8 activo y
 devuelve los EPP detectados con su clase, confianza y posición.
-
+ 
 - El modelo se carga una sola vez y queda en memoria (cargar un .pt tarda segundos).
 - El archivo del modelo se busca en  modelos/epp_<versión>.pt  (ej.: modelos/epp_v1.pt),
   según la versión del modelo marcado como activo en el panel.
@@ -11,39 +11,43 @@ devuelve los EPP detectados con su clase, confianza y posición.
 import threading
 import time
 from pathlib import Path
-
+ 
 from django.conf import settings
-
+ 
 from configuracion.models import ModeloVision
-
-
+ 
+ 
 class DeteccionNoDisponible(Exception):
     """El servicio no puede detectar (sin modelo activo, archivo faltante, etc.)."""
-
-
+ 
+ 
 class ImagenNoValida(Exception):
     """El fotograma recibido no es una imagen válida."""
-
-
+ 
+ 
+# Gafas y mascarilla van en la cara: un recuadro más grande que el 5 % de la imagen es un error del modelo.
+AREA_MAXIMA = {"safety_glasses": 0.05, "mask": 0.05}
+ 
+ 
 # Un solo modelo en memoria. El candado evita que dos peticiones usen el modelo a la vez.
 _candado = threading.RLock()
 _cache = {"id": None, "modelo": None, "nombre": None}
-
-
+ 
+ 
 def _imgsz():
     return int(getattr(settings, "DETECCION_IMGSZ", 640))
-
-
+ 
+ 
 def _confianza_base():
     # Umbral bajo y general: el umbral de cada EPP por laboratorio se aplica después (HU07).
     return float(getattr(settings, "DETECCION_CONFIANZA", 0.25))
-
-
+ 
+ 
 def ruta_modelo(modelo):
     carpeta = Path(getattr(settings, "MODELOS_DIR", Path(settings.BASE_DIR) / "modelos"))
     return carpeta / f"epp_{modelo.version}.pt"
-
-
+ 
+ 
 def obtener_modelo():
     """Devuelve (modelo YOLO, nombre). Lo recarga solo si cambió el modelo activo."""
     activo = ModeloVision.objects.filter(activo=True).first()
@@ -64,22 +68,22 @@ def obtener_modelo():
             yolo.predict(np.zeros((_imgsz(), _imgsz(), 3), dtype=np.uint8), imgsz=_imgsz(), verbose=False)
             _cache.update(id=activo.pk, modelo=yolo, nombre=str(activo))
         return _cache["modelo"], _cache["nombre"]
-
-
+ 
+ 
 def decodificar(datos):
     """Convierte los bytes del JPEG en una imagen de OpenCV (en memoria, sin guardar)."""
     import cv2
     import numpy as np
-
+ 
     imagen = cv2.imdecode(np.frombuffer(datos or b"", dtype=np.uint8), cv2.IMREAD_COLOR) if datos else None
     if imagen is None:
         raise ImagenNoValida("El fotograma recibido no es una imagen válida.")
     return imagen
-
-
+ 
+ 
 def detectar(datos):
     """Analiza un fotograma y devuelve las detecciones (TK07-CA02).
-
+ 
     Respuesta:
       {"detecciones": [{"clase": "gloves", "confianza": 0.91, "caja": [x1, y1, x2, y2]}, ...],
        "ms": 85, "modelo": "epp-yolov8n v1"}
@@ -90,9 +94,10 @@ def detectar(datos):
     imagen = decodificar(datos)
     with _candado:
         inicio = time.perf_counter()
-        resultado = modelo.predict(imagen, imgsz=_imgsz(), conf=_confianza_base(), verbose=False)[0]
+        # agnostic_nms: si dos clases marcan la misma zona, queda solo la de mayor confianza.
+        resultado = modelo.predict(imagen, imgsz=_imgsz(), conf=_confianza_base(), agnostic_nms=True, verbose=False)[0]
         ms = round((time.perf_counter() - inicio) * 1000)
-
+ 
     cajas = resultado.boxes
     detecciones = [
         {
@@ -101,5 +106,7 @@ def detectar(datos):
             "caja": [round(float(v), 4) for v in caja],
         }
         for caja, confianza, clase in zip(cajas.xyxyn.tolist(), cajas.conf.tolist(), cajas.cls.tolist())
+        if (caja[2] - caja[0]) * (caja[3] - caja[1]) <= AREA_MAXIMA.get(resultado.names[int(clase)], 1)
     ]
     return {"detecciones": detecciones, "ms": ms, "modelo": nombre}
+ 

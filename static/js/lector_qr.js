@@ -42,6 +42,8 @@
     // Tiempo de respuesta del servidor, útil para medir el RNF04 (CP55).
     html += `<p class="small text-muted-epp mt-3 mb-0">Identificado en ${milisegundos} ms</p>`;
     resultado.innerHTML = html;
+    // Aviso para la detección de EPP (HU06): solo se habilita con un estudiante identificado.
+    document.dispatchEvent(new CustomEvent("epp:identificacion", { detail: datos }));
   }
 
   // datos: { qr: "..." } cuando lee la cámara, o { codigo: "..." } cuando se escribe a mano.
@@ -92,9 +94,14 @@
     }
   });
 
-  btnDetener.addEventListener("click", async () => {
-    await lector.stop();
+  async function detenerLector() {
+    if (lector.isScanning) await lector.stop();
     btnIniciar.disabled = false;
     btnDetener.disabled = true;
-  });
+  }
+
+  btnDetener.addEventListener("click", detenerLector);
+
+  // La detección de EPP (HU06) usa la misma cámara: primero se apaga el lector de QR.
+  window.EPP.detenerLector = detenerLector;
 })();

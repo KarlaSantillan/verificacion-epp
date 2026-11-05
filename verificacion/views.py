@@ -1,10 +1,12 @@
 import json
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Prefetch
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
+from configuracion.models import Epp, Laboratorio, LaboratorioEpp, ModeloVision
 from estudiantes.servicios import (
     QRNoValido,
     identificar_por_codigo,
@@ -14,10 +16,42 @@ from estudiantes.servicios import (
 )
 
 
+def configuracion_laboratorios():
+    """Requisitos de EPP de cada laboratorio activo, para la pantalla de detección (HU06 / HU12)."""
+    requisitos = LaboratorioEpp.objects.filter(activo=True, epp__activo=True).select_related("epp").order_by("epp__nombre")
+    laboratorios = Laboratorio.objects.filter(activo=True).prefetch_related(Prefetch("requisitos", queryset=requisitos))
+    return [
+        {
+            "id": laboratorio.id_laboratorio,
+            "nombre": laboratorio.nombre,
+            "estabilizacion": laboratorio.tiempo_estabilizacion_segundos,
+            "requisitos": [
+                {
+                    "epp": requisito.epp.nombre,
+                    "clase": requisito.epp.clase_modelo,
+                    "obligatorio": requisito.obligatorio,
+                    "confianza_minima": float(requisito.confianza_minima),
+                }
+                for requisito in laboratorio.requisitos.all()
+            ],
+        }
+        for laboratorio in laboratorios
+    ]
+
+
 @login_required
 def verificar(request):
-    """Pantalla de verificación en vivo. Paso 1: identificación por QR (HU02) o por código escrito (HU03)."""
-    return render(request, "verificacion/verificar.html")
+    """Pantalla de verificación en vivo.
+
+    Paso 1: identificación por QR (HU02) o por código escrito (HU03).
+    Paso 2: detección de EPP en vivo con el modelo activo (HU06).
+    """
+    contexto = {
+        "laboratorios": configuracion_laboratorios(),
+        "nombres_epp": {epp.clase_modelo: epp.nombre for epp in Epp.objects.filter(activo=True)},
+        "modelo_activo": ModeloVision.objects.filter(activo=True).first(),
+    }
+    return render(request, "verificacion/verificar.html", contexto)
 
 
 def _identificar(datos, usuario):
