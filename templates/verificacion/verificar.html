@@ -15,6 +15,19 @@
         <button id="btnDetener" type="button" class="btn btn-epp-outline px-3" disabled><i class="bi bi-stop-circle me-1"></i>Detener</button>
       </div>
       <p class="small text-muted-epp mt-2 mb-0">Acerque el QR a unos 20 cm de la cámara. Funciona con el carné en pantalla o impreso.</p>
+
+      <!-- HU03: ingreso manual cuando la cámara no lee el QR -->
+      <hr class="my-3">
+      <form id="formCodigo" class="row g-2 align-items-end" novalidate>
+        <div class="col-sm-8">
+          <label for="codigoManual" class="form-label small fw-semibold mb-1">¿La cámara no lee el QR? Escriba el código del carné</label>
+          <input id="codigoManual" type="text" class="form-control" inputmode="numeric" autocomplete="off"
+                 maxlength="50" placeholder="Ej.: 1234567890123">
+        </div>
+        <div class="col-sm-4 d-grid">
+          <button id="btnCodigo" type="submit" class="btn btn-epp-outline"><i class="bi bi-keyboard me-1"></i>Identificar</button>
+        </div>
+      </form>
     </div>
   </div>
 

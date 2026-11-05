@@ -5,28 +5,45 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
-from estudiantes.servicios import QRNoValido, identificar_por_qr, ocultar_cedula
+from estudiantes.servicios import (
+    QRNoValido,
+    identificar_por_codigo,
+    identificar_por_qr,
+    ocultar_cedula,
+    validar_codigo,
+)
 
 
 @login_required
 def verificar(request):
-    """Pantalla de verificación en vivo. Por ahora: paso 1, identificación por QR (HU02)."""
+    """Pantalla de verificación en vivo. Paso 1: identificación por QR (HU02) o por código escrito (HU03)."""
     return render(request, "verificacion/verificar.html")
+
+
+def _identificar(datos, usuario):
+    """Usa el QR leído por la cámara o, si viene 'codigo', el código escrito a mano (HU03)."""
+    if "codigo" in datos:
+        codigo = "".join(str(datos.get("codigo") or "").split())  # quita espacios que el docente haya escrito
+        if not codigo:
+            raise QRNoValido("Escriba el código de validación impreso en el carné.")
+        return identificar_por_codigo(validar_codigo(codigo), usuario)
+    return identificar_por_qr(datos.get("qr", ""), usuario)
 
 
 @login_required
 @require_POST
 def identificar(request):
-    """Recibe el texto leído del QR y devuelve los datos del estudiante en JSON."""
+    """Recibe el texto del QR o el código escrito y devuelve los datos del estudiante en JSON."""
     try:
         datos = json.loads(request.body or "{}")
     except json.JSONDecodeError:
         return JsonResponse({"ok": False, "estado": "error", "mensaje": "Solicitud no válida."}, status=400)
 
     try:
-        resultado = identificar_por_qr(datos.get("qr", ""), request.user)
+        resultado = _identificar(datos, request.user)
     except QRNoValido as error:
-        return JsonResponse({"ok": False, "estado": "qr_no_valido", "mensaje": str(error)}, status=400)
+        estado = "codigo_no_valido" if "codigo" in datos else "qr_no_valido"
+        return JsonResponse({"ok": False, "estado": estado, "mensaje": str(error)}, status=400)
 
     carnet = resultado.carnet
     if carnet is None:  # el SGA indicó que el carné no es válido

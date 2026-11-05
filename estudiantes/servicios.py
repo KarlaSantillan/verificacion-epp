@@ -1,7 +1,7 @@
 """Identificación del estudiante mediante el QR del carné (HU02) y registro de carnés nuevos (HU04).
 
 El QR del carné digital de la UNEMI contiene una dirección como:
-    https://sga.unemi.edu.ec/p_valida_carnet/digital?code=2744921411013
+    https://sga.unemi.edu.ec/p_valida_carnet/digital?code=1234567890123
 Del QR solo se extrae el código. Con ese código se consulta la página pública de
 validación del SGA (módulo sga.py) para completar los datos del estudiante.
 """

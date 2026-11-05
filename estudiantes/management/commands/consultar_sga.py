@@ -1,8 +1,8 @@
 """Prueba la lectura de la página de validación del SGA con un carné real.
 
 Uso:
-    python manage.py consultar_sga 2744921411013
-    python manage.py consultar_sga 2744921411013 --guardar    (guarda el HTML en sga_pagina.html)
+    python manage.py consultar_sga 1234567890123
+    python manage.py consultar_sga 1234567890123 --guardar    (guarda el HTML en sga_pagina.html)
 
 Muestra solo en la consola lo que el sistema lograría leer. No guarda nada en la base de datos.
 """

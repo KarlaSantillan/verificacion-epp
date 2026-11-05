@@ -1,4 +1,4 @@
-// Lectura del QR del carné con la cámara (HU02) usando la librería html5-qrcode.
+// Lectura del QR del carné con la cámara (HU02) y por código escrito a mano (HU03).
 (function () {
   const resultado = document.getElementById("resultado");
   const btnIniciar = document.getElementById("btnIniciar");
@@ -16,6 +16,7 @@
     vencido: "aviso aviso-error",
     no_valido_sga: "aviso aviso-error",
     qr_no_valido: "aviso aviso-error",
+    codigo_no_valido: "aviso aviso-error",
     error: "aviso aviso-error",
   };
 
@@ -43,14 +44,15 @@
     resultado.innerHTML = html;
   }
 
-  async function enviar(textoQR) {
+  // datos: { qr: "..." } cuando lee la cámara, o { codigo: "..." } cuando se escribe a mano.
+  async function enviar(datosEnvio) {
     const inicio = performance.now();
     procesando = true;
     try {
       const respuesta = await fetch(window.EPP.urlIdentificar, {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": window.EPP.csrf },
-        body: JSON.stringify({ qr: textoQR }),
+        body: JSON.stringify(datosEnvio),
       });
       const datos = await respuesta.json();
       mostrar(datos, Math.round(performance.now() - inicio));
@@ -67,8 +69,18 @@
     if (procesando || (textoQR === ultimoTexto && ahora - ultimoMomento < 4000)) return;
     ultimoTexto = textoQR;
     ultimoMomento = ahora;
-    enviar(textoQR);
+    enviar({ qr: textoQR });
   }
+
+  // HU03: ingreso manual del código impreso en el carné.
+  const formCodigo = document.getElementById("formCodigo");
+  const codigoManual = document.getElementById("codigoManual");
+  formCodigo.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    if (procesando) return;
+    await enviar({ codigo: codigoManual.value });
+    codigoManual.select();
+  });
 
   btnIniciar.addEventListener("click", async () => {
     try {
