@@ -3,7 +3,18 @@ from django.utils.html import format_html
 
 from .models import CarnetEstudiantil, Estudiante
 from .sga import url_validacion
+from django import forms
 
+from .forms import validar_cedula
+
+
+class EstudianteAdminForm(forms.ModelForm):
+    class Meta:
+        model = Estudiante
+        fields = "__all__"
+
+    def clean_cedula(self):
+        return validar_cedula(self.cleaned_data.get("cedula")) or None
 
 def enlace_sga(carnet):
     """Enlace a la página oficial de validación, para revisar a mano los carnés pendientes (HU05)."""
@@ -29,6 +40,7 @@ class CarnetInline(admin.TabularInline):
 
 @admin.register(Estudiante)
 class EstudianteAdmin(admin.ModelAdmin):
+    form = EstudianteAdminForm
     list_display = ["__str__", "cedula", "carrera", "nivel", "activo"]
     search_fields = ["nombres", "apellidos", "cedula"]
     list_filter = ["activo", "carrera"]

@@ -4,6 +4,7 @@ from django.urls import NoReverseMatch, reverse
 MENU_OPERACION = [
     ("Inicio", "grid-1x2", "core:inicio"),
     ("Verificación en vivo", "camera-video", "verificacion:verificar"),  # HU02/HU06 (Leo)    ("Registros", "journal-text", None),  # HU10
+    ("Carnés pendientes", "person-exclamation", "estudiantes:pendientes"),  # HU05 (Karla)
     ("Incidencias", "exclamation-triangle", None),  # HU10 / HU15
     ("Ayuda", "question-circle", None),
 ]

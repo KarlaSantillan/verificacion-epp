@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Completar carné{% endblock %}
+
+{% block contenido %}
+<a href="{% url 'estudiantes:pendientes' %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Carnés pendientes</a>
+<h1 class="fs-3 fw-semibold text-heading mt-2 mb-1">Completar carné {{ carnet.codigo_validacion }}</h1>
+<p class="text-muted-epp">
+  Copie los datos que aparecen en la página de validación del SGA.
+  {% if url_sga %}<a href="{{ url_sga }}" target="_blank" rel="noopener">Abrir validación en SGA <i class="bi bi-box-arrow-up-right"></i></a>{% endif %}
+</p>
+
+<div class="tarjeta p-3" style="max-width: 760px">
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="aviso aviso-error mb-3">{{ form.non_field_errors|join:" " }}</div>{% endif %}
+    <div class="row g-3">
+      {% for campo in form %}
+      <div class="col-sm-6">
+        <label for="{{ campo.id_for_label }}" class="form-label small fw-semibold mb-1">{{ campo.label }}{% if campo.field.required %} *{% endif %}</label>
+        {{ campo }}
+        {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+        {% for error in campo.errors %}<div class="small text-danger mt-1">{{ error }}</div>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-epp px-4"><i class="bi bi-check2 me-1"></i>Guardar y registrar</button>
+      <a href="{% url 'estudiantes:pendientes' %}" class="btn btn-epp-outline px-4">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

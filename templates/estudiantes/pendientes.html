@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Carnés pendientes{% endblock %}
+
+{% block contenido %}
+<h1 class="fs-3 fw-semibold text-heading mb-1">Carnés pendientes de revisión</h1>
+<p class="text-muted-epp">Carnés registrados cuando el SGA no respondió. Vuelva a consultarlos o complete sus datos revisando la página de validación.</p>
+
+{% if carnets %}
+<div class="tarjeta p-0 overflow-hidden">
+  <div class="table-responsive">
+    <table class="table align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Código del carné</th>
+          <th>Registrado</th>
+          <th>Por</th>
+          <th>Validación SGA</th>
+          <th class="text-end">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for carnet in carnets %}
+        <tr>
+          <td class="fw-semibold">{{ carnet.codigo_validacion|default:"—" }}</td>
+          <td>{{ carnet.fecha_creacion|date:"d/m/Y H:i" }}</td>
+          <td>{{ carnet.usuario_registro.nombres }} {{ carnet.usuario_registro.apellidos }}</td>
+          <td>
+            {% if carnet.url_sga %}
+              <a href="{{ carnet.url_sga }}" target="_blank" rel="noopener">Ver en SGA <i class="bi bi-box-arrow-up-right"></i></a>
+            {% else %}—{% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            <form method="post" action="{% url 'estudiantes:reconsultar' carnet.id_carnet %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-epp-outline"><i class="bi bi-arrow-repeat me-1"></i>Consultar SGA</button>
+            </form>
+            <a href="{% url 'estudiantes:completar' carnet.id_carnet %}" class="btn btn-sm btn-epp ms-1"><i class="bi bi-pencil me-1"></i>Completar</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="aviso aviso-info d-flex gap-2"><i class="bi bi-check-circle"></i><div>No hay carnés pendientes de revisión.</div></div>
+{% endif %}
+{% endblock %}
