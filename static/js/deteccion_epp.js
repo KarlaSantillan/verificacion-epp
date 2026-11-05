@@ -1,32 +1,50 @@
-// Detección de EPP en vivo (HU06 / RF05).
+// Detección de EPP en vivo (HU06 / RF05) y resultado de cumplimiento (HU07 / RF06).
 // Toma fotogramas del video, los envía al servicio de detección (TK07) y dibuja
 // los recuadros. Los fotogramas solo viajan en memoria: no se guardan (RF05-CA05).
+//
+// Estabilización (HU07-CA03): el estado de los EPP obligatorios debe mantenerse igual
+// durante el tiempo configurado en el laboratorio. Para que un fotograma borroso no
+// reinicie la cuenta, cada EPP usa su mejor confianza del último segundo.
 (function () {
   const laboratorios = JSON.parse(document.getElementById("datos-laboratorios").textContent);
   const nombresEpp = JSON.parse(document.getElementById("nombres-epp").textContent);
 
-  const selLaboratorio = document.getElementById("laboratorio");
-  const pasoIdentificacion = document.getElementById("pasoIdentificacion");
-  const pasoDeteccion = document.getElementById("pasoDeteccion");
-  const btnVerificarEpp = document.getElementById("btnVerificarEpp");
-  const btnTerminar = document.getElementById("btnTerminar");
-  const video = document.getElementById("video");
-  const lienzo = document.getElementById("lienzo");
-  const videoVacio = document.getElementById("videoVacio");
-  const mensaje = document.getElementById("mensajeDeteccion");
-  const listaEpp = document.getElementById("listaEpp");
-  const velocidad = document.getElementById("velocidad");
-  const estudianteDeteccion = document.getElementById("estudianteDeteccion");
+  const $ = (id) => document.getElementById(id);
+  const selLaboratorio = $("laboratorio");
+  const pasoIdentificacion = $("pasoIdentificacion");
+  const pasoDeteccion = $("pasoDeteccion");
+  const btnVerificarEpp = $("btnVerificarEpp");
+  const btnTerminar = $("btnTerminar");
+  const btnReintentar = $("btnReintentar");
+  const video = $("video");
+  const lienzo = $("lienzo");
+  const videoVacio = $("videoVacio");
+  const mensaje = $("mensajeDeteccion");
+  const listaEpp = $("listaEpp");
+  const velocidad = $("velocidad");
+  const estudianteDeteccion = $("estudianteDeteccion");
+  const progreso = $("progreso");
+  const textoProgreso = $("textoProgreso");
+  const barraProgreso = $("barraProgreso");
+  const resultadoFinal = $("resultadoFinal");
 
   const ANCHO_ENVIO = 640; // el modelo trabaja a 640 px: enviar más grande solo hace más lento el envío
-  const SIN_DETECCION_MS = 1500; // tiempo sin detecciones antes de avisar (CA03)
+  const SIN_DETECCION_MS = 1500; // tiempo sin detecciones antes de avisar (HU06-CA03)
+  const VENTANA_MS = 1000; // cada EPP usa su mejor confianza del último segundo
   const captura = document.createElement("canvas");
 
   let estudiante = null;
   let flujo = null;
-  let activo = false;
+  let activo = false; // la cámara está encendida
+  let pausado = false; // ya hay resultado: no se envían más fotogramas
   let ultimaDeteccion = 0;
   let tiempos = [];
+
+  // Estado de la estabilización
+  let historial = []; // [{ t, confianzas: {clase: confianza} }]
+  let claveEstable = null;
+  let inicioEstable = null;
+  let maximos = {};
 
   function texto(valor) {
     const span = document.createElement("span");
@@ -35,11 +53,15 @@
   }
 
   function laboratorioActual() {
-    return laboratorios.find((l) => String(l.id) === selLaboratorio.value) || { requisitos: [] };
+    return laboratorios.find((l) => String(l.id) === selLaboratorio.value) || { requisitos: [], estabilizacion: 3 };
   }
 
   function avisar(clase, contenido) {
     mensaje.innerHTML = contenido ? `<div class="aviso ${clase}">${contenido}</div>` : "";
+  }
+
+  function pct(valor) {
+    return `${Math.round(valor * 100)} %`;
   }
 
   // ---------- Paso 1 → Paso 2
@@ -51,8 +73,8 @@
 
   btnVerificarEpp.addEventListener("click", async () => {
     if (!estudiante) return;
-    if (!laboratorioActual().requisitos.length) {
-      alertaLista("El laboratorio seleccionado no tiene EPP configurados.");
+    if (!laboratorioActual().requisitos.some((r) => r.obligatorio)) {
+      $("resultado").insertAdjacentHTML("beforeend", '<div class="aviso aviso-warn mt-3">El laboratorio seleccionado no tiene EPP obligatorios configurados.</div>');
       return;
     }
     await window.EPP.detenerLector();
@@ -60,7 +82,7 @@
     pasoDeteccion.classList.remove("d-none");
     estudianteDeteccion.textContent = `${estudiante.nombre} · ${selLaboratorio.options[selLaboratorio.selectedIndex].text}`;
     selLaboratorio.disabled = true;
-    pintarLista([]);
+    reiniciarEvaluacion();
     iniciar();
   });
 
@@ -71,11 +93,24 @@
     selLaboratorio.disabled = false;
     pasoDeteccion.classList.add("d-none");
     pasoIdentificacion.classList.remove("d-none");
-    document.getElementById("resultado").textContent = "Esperando la lectura del código QR…";
+    $("resultado").textContent = "Esperando la lectura del código QR…";
   });
 
-  function alertaLista(texto_) {
-    document.getElementById("resultado").insertAdjacentHTML("beforeend", `<div class="aviso aviso-warn mt-3">${texto(texto_)}</div>`);
+  // El estudiante corrige sus EPP y se vuelve a evaluar.
+  btnReintentar.addEventListener("click", reiniciarEvaluacion);
+
+  function reiniciarEvaluacion() {
+    historial = [];
+    claveEstable = null;
+    inicioEstable = null;
+    maximos = {};
+    pausado = false;
+    resultadoFinal.classList.add("d-none");
+    resultadoFinal.innerHTML = "";
+    btnReintentar.classList.add("d-none");
+    progreso.classList.remove("d-none");
+    mostrarProgreso(0, "Esperando una detección estable…");
+    pintarLista({});
   }
 
   // ---------- Cámara
@@ -115,11 +150,13 @@
     return new Promise((resolver) => captura.toBlob(resolver, "image/jpeg", 0.75));
   }
 
+  const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
+
   // Un fotograma a la vez: se envía el siguiente cuando llega la respuesta del anterior.
   async function ciclo() {
     while (activo) {
-      if (!video.videoWidth) {
-        await new Promise((r) => setTimeout(r, 100));
+      if (!video.videoWidth || pausado) {
+        await esperar(100);
         continue;
       }
       const inicio = performance.now();
@@ -132,13 +169,13 @@
           body: datos,
         });
         const resultado = await respuesta.json();
-        if (!activo) break;
+        if (!activo || pausado) continue;
         if (!resultado.ok) {
-          // CA03 / RF05-CA04: servicio no disponible → mensaje y reintento, sin registrar nada.
+          // HU06-CA03 / RF05-CA04: servicio no disponible → mensaje, sin resultado ni registro.
           avisar("aviso-error", `<i class="bi bi-x-octagon me-1"></i>${texto(resultado.mensaje)}`);
           dibujar([]);
-          pintarLista([]);
-          await new Promise((r) => setTimeout(r, 2000));
+          reiniciarCuenta();
+          await esperar(2000);
           continue;
         }
         procesar(resultado.detecciones);
@@ -146,7 +183,8 @@
       } catch (e) {
         if (!activo) break;
         avisar("aviso-error", '<i class="bi bi-x-octagon me-1"></i>No se pudo comunicar con el servicio de detección.');
-        await new Promise((r) => setTimeout(r, 2000));
+        reiniciarCuenta();
+        await esperar(2000);
       }
     }
   }
@@ -158,22 +196,104 @@
     velocidad.textContent = `${(1000 / promedio).toFixed(1)} FPS · ${Math.round(promedio)} ms`;
   }
 
-  // ---------- Resultados
+  // ---------- Detecciones de cada fotograma
   function procesar(detecciones) {
     const requisitos = laboratorioActual().requisitos;
     const minimo = Object.fromEntries(requisitos.map((r) => [r.clase, r.confianza_minima]));
     dibujar(detecciones, minimo);
-    pintarLista(detecciones);
 
-    if (detecciones.length) ultimaDeteccion = performance.now();
-    if (performance.now() - ultimaDeteccion > SIN_DETECCION_MS) {
-      // CA03: el modelo no tiene la clase "persona"; sin ninguna detección se asume que nadie está en el encuadre.
+    const ahora = performance.now();
+    const delFotograma = {};
+    for (const d of detecciones) delFotograma[d.clase] = Math.max(delFotograma[d.clase] || 0, d.confianza);
+    historial.push({ t: ahora, confianzas: delFotograma });
+    historial = historial.filter((h) => ahora - h.t <= VENTANA_MS);
+
+    // Mejor confianza de cada EPP en el último segundo.
+    const suavizadas = {};
+    for (const h of historial) {
+      for (const [clase, valor] of Object.entries(h.confianzas)) suavizadas[clase] = Math.max(suavizadas[clase] || 0, valor);
+    }
+    pintarLista(suavizadas);
+
+    if (detecciones.length) ultimaDeteccion = ahora;
+    if (ahora - ultimaDeteccion > SIN_DETECCION_MS) {
+      // HU06-CA03: el modelo no tiene la clase "persona"; sin detecciones se asume que nadie está en el encuadre.
       avisar("aviso-warn", '<i class="bi bi-person-exclamation me-1"></i>No se detecta a ninguna persona con EPP en el encuadre. Ubíquese frente a la cámara.');
-    } else {
-      avisar("", "");
+      reiniciarCuenta();
+      return;
+    }
+    avisar("", "");
+    estabilizar(requisitos, suavizadas, ahora);
+  }
+
+  // ---------- HU07: estabilización y resultado
+  function reiniciarCuenta() {
+    claveEstable = null;
+    inicioEstable = null;
+    maximos = {};
+    if (!pausado) mostrarProgreso(0, "Esperando una detección estable…");
+  }
+
+  function estabilizar(requisitos, suavizadas, ahora) {
+    // Clave = qué EPP obligatorios están detectados. Si cambia, la cuenta vuelve a empezar.
+    const clave = requisitos
+      .filter((r) => r.obligatorio)
+      .map((r) => `${r.clase}:${(suavizadas[r.clase] || 0) >= r.confianza_minima ? 1 : 0}`)
+      .join("|");
+    if (clave !== claveEstable) {
+      claveEstable = clave;
+      inicioEstable = ahora;
+      maximos = {};
+    }
+    for (const [clase, valor] of Object.entries(suavizadas)) maximos[clase] = Math.max(maximos[clase] || 0, valor);
+
+    const segundos = laboratorioActual().estabilizacion;
+    const transcurrido = (ahora - inicioEstable) / 1000;
+    const avance = segundos > 0 ? Math.min(1, transcurrido / segundos) : 1;
+    mostrarProgreso(avance, `Manténgase quieto: ${Math.min(transcurrido, segundos).toFixed(1)} de ${segundos} s`);
+    if (avance >= 1) emitirResultado({ ...maximos });
+  }
+
+  function mostrarProgreso(avance, etiqueta) {
+    barraProgreso.style.width = `${Math.round(avance * 100)}%`;
+    textoProgreso.textContent = etiqueta;
+  }
+
+  async function emitirResultado(confianzas) {
+    pausado = true;
+    mostrarProgreso(1, "Calculando el resultado…");
+    try {
+      const respuesta = await fetch(window.EPP.urlEvaluar, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": window.EPP.csrf },
+        body: JSON.stringify({ laboratorio: selLaboratorio.value, confianzas }),
+      });
+      const datos = await respuesta.json();
+      if (!datos.ok) throw new Error(datos.mensaje);
+      mostrarResultado(datos);
+    } catch (e) {
+      avisar("aviso-error", `<i class="bi bi-x-octagon me-1"></i>No se pudo calcular el resultado. ${texto(e.message || "")}`);
+      reiniciarEvaluacion();
     }
   }
 
+  function mostrarResultado(datos) {
+    const cumple = datos.resultado === "conforme";
+    let html = `<div class="titulo"><i class="bi ${cumple ? "bi-check-circle-fill" : "bi-x-circle-fill"} me-1"></i>${texto(datos.etiqueta)}</div>`;
+    if (!cumple) {
+      html += `<div class="mt-2 fw-semibold">Falta: ${datos.faltantes.map(texto).join(", ")}</div>`;
+      html += '<div class="small mt-1">Colóquese los EPP faltantes y presione "Verificar de nuevo".</div>';
+    }
+    resultadoFinal.className = `resultado-final mt-3 ${cumple ? "cumple" : "no-cumple"}`;
+    resultadoFinal.innerHTML = html;
+    progreso.classList.add("d-none");
+    btnReintentar.classList.remove("d-none");
+    pintarListaFinal(datos.detalles);
+    // HU08 se conectará aquí: registrar el ingreso "Cumple" o el intento "No cumple".
+    document.dispatchEvent(new CustomEvent("epp:resultado", { detail: datos }));
+  }
+
+  // ---------- Dibujo y lista
   function dibujar(detecciones, minimo = {}) {
     const ancho = video.clientWidth;
     const alto = video.clientHeight;
@@ -192,7 +312,7 @@
       // Verde: supera la confianza mínima del laboratorio. Naranja: detectado con poca confianza.
       const cumple = d.clase in minimo && d.confianza >= minimo[d.clase];
       const color = cumple ? "#15803d" : "#fb7e00";
-      const etiqueta = `${nombresEpp[d.clase] || d.clase} ${Math.round(d.confianza * 100)} %`;
+      const etiqueta = `${nombresEpp[d.clase] || d.clase} ${pct(d.confianza)}`;
       ctx.strokeStyle = color;
       ctx.strokeRect(x, y, w, h);
       const anchoTexto = ctx.measureText(etiqueta).width + 10;
@@ -204,25 +324,31 @@
     }
   }
 
-  // CA02: estado de cada EPP requerido, actualizado con cada fotograma.
-  function pintarLista(detecciones) {
-    const mejor = {};
-    for (const d of detecciones) mejor[d.clase] = Math.max(mejor[d.clase] || 0, d.confianza);
+  function filaEpp(nombre, requerido, confianza, umbral, detectado) {
+    const detalle = confianza ? `${pct(confianza)} (mín. ${pct(umbral)})` : `mín. ${pct(umbral)}`;
+    return `
+      <div class="estado-epp ${detectado ? "detectado" : "pendiente"}">
+        <div>
+          <div class="fw-semibold">${texto(nombre)}${requerido ? "" : ' <span class="small text-muted-epp">(opcional)</span>'}</div>
+          <div class="small text-muted-epp">${detalle}</div>
+        </div>
+        <span class="marca">${detectado ? '<i class="bi bi-check-circle-fill"></i> Detectado' : '<i class="bi bi-circle"></i> No detectado'}</span>
+      </div>`;
+  }
+
+  // HU06-CA02: estado de cada EPP requerido, actualizado en vivo.
+  function pintarLista(confianzas) {
     listaEpp.innerHTML = laboratorioActual()
       .requisitos.map((r) => {
-        const confianza = mejor[r.clase] || 0;
-        const detectado = confianza >= r.confianza_minima;
-        const detalle = confianza ? `${Math.round(confianza * 100)} % (mín. ${Math.round(r.confianza_minima * 100)} %)` : `mín. ${Math.round(r.confianza_minima * 100)} %`;
-        return `
-          <div class="estado-epp ${detectado ? "detectado" : "pendiente"}">
-            <div>
-              <div class="fw-semibold">${texto(r.epp)}${r.obligatorio ? "" : ' <span class="small text-muted-epp">(opcional)</span>'}</div>
-              <div class="small text-muted-epp">${detalle}</div>
-            </div>
-            <span class="marca">${detectado ? '<i class="bi bi-check-circle-fill"></i> Detectado' : '<i class="bi bi-circle"></i> No detectado'}</span>
-          </div>`;
+        const confianza = confianzas[r.clase] || 0;
+        return filaEpp(r.epp, r.obligatorio, confianza, r.confianza_minima, confianza >= r.confianza_minima);
       })
       .join("");
+  }
+
+  // Con el resultado, la lista muestra lo que calculó el servidor.
+  function pintarListaFinal(detalles) {
+    listaEpp.innerHTML = detalles.map((d) => filaEpp(d.epp, d.requerido, d.confianza, d.umbral, d.detectado)).join("");
   }
 
   window.addEventListener("beforeunload", detener);

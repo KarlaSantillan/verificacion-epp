@@ -14,6 +14,11 @@
   .estado-epp.detectado { border-color: rgba(21, 128, 61, .4); background: #f0fdf4; }
   .estado-epp.detectado .marca { color: var(--epp-ok); }
   .estado-epp.pendiente .marca { color: var(--epp-muted); }
+  .resultado-final { border-radius: 12px; padding: 1rem; text-align: center; }
+  .resultado-final .titulo { font-size: 1.6rem; font-weight: 700; }
+  .resultado-final.cumple { background: #f0fdf4; color: var(--epp-ok); border: 1px solid rgba(21, 128, 61, .4); }
+  .resultado-final.no-cumple { background: var(--epp-bad-soft); color: var(--epp-bad); border: 1px solid rgba(185, 28, 28, .3); }
+  .progress-bar { background: var(--epp-primary); transition: width .2s linear; }
   .paso { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--epp-primary); color: #fff; font-size: .8rem; font-weight: 700; margin-right: .4rem; }
 </style>
 {% endblock %}
@@ -96,6 +101,19 @@
       <h2 class="fs-5 fw-semibold mb-1">EPP requeridos</h2>
       <p id="estudianteDeteccion" class="small text-muted-epp mb-3"></p>
       <div id="listaEpp"></div>
+
+      <!-- HU07: avance de la estabilización y resultado final -->
+      <div id="progreso" class="mt-3">
+        <div class="d-flex justify-content-between small mb-1">
+          <span id="textoProgreso" class="text-muted-epp">Esperando una detección estable…</span>
+        </div>
+        <div class="progress" style="height: 8px" role="progressbar" aria-label="Estabilización">
+          <div id="barraProgreso" class="progress-bar" style="width: 0%"></div>
+        </div>
+      </div>
+      <div id="resultadoFinal" class="resultado-final mt-3 d-none" aria-live="assertive"></div>
+      <button id="btnReintentar" type="button" class="btn btn-epp w-100 mt-3 d-none"><i class="bi bi-arrow-repeat me-1"></i>Verificar de nuevo</button>
+
       <button id="btnTerminar" type="button" class="btn btn-epp-outline w-100 mt-3"><i class="bi bi-arrow-left me-1"></i>Siguiente estudiante</button>
     </div>
   </div>
@@ -110,9 +128,10 @@
   window.EPP = {
     urlIdentificar: "{% url 'verificacion:identificar' %}",
     urlDetectar: "{% url 'verificacion:detectar' %}",
+    urlEvaluar: "{% url 'verificacion:evaluar' %}",
     csrf: "{{ csrf_token }}",
   };
 </script>
 <script src="{% static 'js/lector_qr.js' %}?v=3"></script>
-<script src="{% static 'js/deteccion_epp.js' %}?v=1"></script>
+<script src="{% static 'js/deteccion_epp.js' %}?v=2"></script>
 {% endblock %}
