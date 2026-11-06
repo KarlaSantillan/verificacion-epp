@@ -17,9 +17,8 @@ MENU_ADMINISTRACION = [
     ("Periodos académicos", "calendar3", "administracion:periodos"),
     ("Parámetros generales", "sliders", "administracion:parametros"),
     ("Modelo de visión", "cpu", "administracion:modelos"),
-    ("Auditoría", "clipboard2-pulse", "admin:auditoria_auditoria_changelist"),  # HU17
+    ("Auditoría", "clipboard2-pulse", "administracion:auditoria"),  # HU17
 ]
-
 
 def _items(request, lista):
     resultado = []

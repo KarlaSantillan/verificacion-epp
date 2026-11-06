@@ -4,6 +4,7 @@ Reemplazan al panel de Django para el uso diario. Solo el administrador entra
 (core.decorators.solo_administrador). Los registros se desactivan, no se eliminan (HU13-CA01).
 """
 from pathlib import Path
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.contrib import messages
@@ -12,13 +13,15 @@ from django.db import transaction
 from django.db.models import Count, Prefetch, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
+from auditoria.models import Auditoria
 from configuracion.models import Epp, Laboratorio, LaboratorioEpp, ModeloVision, Parametro, PeriodoAcademico
 from core.decorators import solo_administrador
 from estudiantes.models import CarnetEstudiantil, Estudiante
 from usuarios.models import Rol, Usuario
 
+from .auditoria_textos import accion_texto, describir_cambios, tabla_texto, valores
 from .forms import (
     EppForm,
     EstudianteForm,
@@ -187,7 +190,9 @@ def _archivo_modelo(modelo):
 @transaction.atomic
 def _activar(modelo):
     """Solo un modelo activo a la vez (HU13-CA03): se desactivan los demás primero."""
-    ModeloVision.objects.exclude(pk=modelo.pk).filter(activo=True).update(activo=False)
+    for otro in ModeloVision.objects.exclude(pk=modelo.pk).filter(activo=True):
+        otro.activo = False
+        otro.save(update_fields=["activo"])  # con save() para que quede en la auditoría (TK08)
     modelo.activo = True
     modelo.save(update_fields=["activo"])
 
@@ -248,3 +253,65 @@ def cambiar_activo(request, tipo, pk):
     if siguiente.startswith("/") and not siguiente.startswith("//"):
         return redirect(siguiente)
     return redirect(destino)
+
+
+# ---------------------------------------------------------------- Auditoría (HU17, solo lectura)
+
+@solo_administrador
+@require_GET
+def auditoria(request):
+    """Bitácora con filtros por fecha, usuario, tabla y acción (HU17-CA01). No hay opciones para editar ni eliminar (CA02)."""
+    filtros = {k: request.GET.get(k, "").strip() for k in ("q", "accion", "tabla", "actor", "usuario", "desde", "hasta")}
+    eventos = Auditoria.objects.select_related("usuario").order_by("-fecha_hora", "-id_auditoria")
+    if filtros["accion"]:
+        eventos = eventos.filter(accion=filtros["accion"])
+    if filtros["tabla"]:
+        eventos = eventos.filter(tabla_afectada=filtros["tabla"])
+    if filtros["actor"] in (Auditoria.USUARIO, Auditoria.SISTEMA):
+        eventos = eventos.filter(tipo_actor=filtros["actor"])
+    if filtros["usuario"].isdigit():
+        eventos = eventos.filter(usuario_id=int(filtros["usuario"]))
+    if filtros["desde"]:
+        eventos = eventos.filter(fecha_hora__date__gte=filtros["desde"])
+    if filtros["hasta"]:
+        eventos = eventos.filter(fecha_hora__date__lte=filtros["hasta"])
+    if filtros["q"]:
+        q = filtros["q"]
+        eventos = eventos.filter(Q(descripcion__icontains=q) | Q(usuario__nombres__icontains=q) | Q(usuario__apellidos__icontains=q))
+
+    pagina = Paginator(eventos, 20).get_page(request.GET.get("pagina"))
+    for evento in pagina:
+        evento.tabla_texto = tabla_texto(evento.tabla_afectada)
+        evento.accion_texto = accion_texto(evento.accion)
+
+    todos = Auditoria.objects.all()
+    contexto = {
+        "pagina": pagina,
+        "filtros": filtros,
+        "parametros_url": urlencode({k: v for k, v in filtros.items() if v}),
+        "acciones": Auditoria.ACCIONES,
+        "tablas": [(t, tabla_texto(t)) for t in todos.order_by("tabla_afectada").values_list("tabla_afectada", flat=True).distinct()],
+        "usuarios": Usuario.objects.filter(eventos_auditoria__isnull=False).distinct().order_by("apellidos"),
+        "totales": {
+            "eventos": todos.count(),
+            "usuarios": todos.filter(tipo_actor=Auditoria.USUARIO).count(),
+            "sistema": todos.filter(tipo_actor=Auditoria.SISTEMA).count(),
+            "modificaciones": todos.filter(accion="UPDATE").count(),
+        },
+    }
+    return render(request, "administracion/auditoria.html", contexto)
+
+
+@solo_administrador
+@require_GET
+def auditoria_detalle(request, pk):
+    evento = get_object_or_404(Auditoria.objects.select_related("usuario"), pk=pk)
+    contexto = {
+        "evento": evento,
+        "tabla": tabla_texto(evento.tabla_afectada),
+        "accion": accion_texto(evento.accion),
+        "resumen": describir_cambios(evento),
+        "antes": valores(evento.datos_anteriores),
+        "despues": valores(evento.datos_nuevos),
+    }
+    return render(request, "administracion/auditoria_detalle.html", contexto)

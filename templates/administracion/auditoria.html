@@ -1,0 +1,62 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Auditoría{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina"><div><h1>Auditoría</h1><p>Bitácora de solo lectura de acciones sobre los datos. Los eventos no se pueden editar ni eliminar.</p></div></div>
+
+<div class="row g-3 mb-4">
+  <div class="col-6 col-xl-3"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono"><i class="bi bi-clipboard2-pulse"></i></span><div><div class="small text-muted-epp">Eventos</div><div class="fs-4 fw-semibold">{{ totales.eventos }}</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono" style="background: var(--epp-accent-soft)"><i class="bi bi-person"></i></span><div><div class="small text-muted-epp">Por usuarios</div><div class="fs-4 fw-semibold">{{ totales.usuarios }}</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono"><i class="bi bi-cpu"></i></span><div><div class="small text-muted-epp">Por el sistema</div><div class="fs-4 fw-semibold">{{ totales.sistema }}</div></div></div></div>
+  <div class="col-6 col-xl-3"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono" style="background: var(--epp-warn-soft); color: var(--epp-warn)"><i class="bi bi-pencil-square"></i></span><div><div class="small text-muted-epp">Modificaciones</div><div class="fs-4 fw-semibold">{{ totales.modificaciones }}</div></div></div></div>
+</div>
+
+<form method="get" class="tarjeta p-3 mb-4">
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-3"><label class="form-label small mb-1" for="q">Buscar</label><input id="q" name="q" value="{{ filtros.q }}" class="form-control" placeholder="Descripción o usuario"></div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="accion">Acción</label>
+      <select id="accion" name="accion" class="form-select"><option value="">Todas</option>{% for valor, texto in acciones %}<option value="{{ valor }}"{% if filtros.accion == valor %} selected{% endif %}>{{ texto }}</option>{% endfor %}</select></div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="tabla">Elemento</label>
+      <select id="tabla" name="tabla" class="form-select"><option value="">Todos</option>{% for valor, texto in tablas %}<option value="{{ valor }}"{% if filtros.tabla == valor %} selected{% endif %}>{{ texto }}</option>{% endfor %}</select></div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="usuario">Usuario</label>
+      <select id="usuario" name="usuario" class="form-select"><option value="">Todos</option>{% for u in usuarios %}<option value="{{ u.pk }}"{% if filtros.usuario == u.pk|stringformat:"s" %} selected{% endif %}>{{ u.nombres }} {{ u.apellidos }}</option>{% endfor %}</select></div>
+    <div class="col-6 col-lg-1"><label class="form-label small mb-1" for="actor">Actor</label>
+      <select id="actor" name="actor" class="form-select"><option value="">Todos</option><option value="usuario"{% if filtros.actor == "usuario" %} selected{% endif %}>Usuario</option><option value="sistema"{% if filtros.actor == "sistema" %} selected{% endif %}>Sistema</option></select></div>
+    <div class="col-6 col-lg-1"><label class="form-label small mb-1" for="desde">Desde</label><input id="desde" type="date" name="desde" value="{{ filtros.desde }}" class="form-control"></div>
+    <div class="col-6 col-lg-1"><label class="form-label small mb-1" for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" value="{{ filtros.hasta }}" class="form-control"></div>
+  </div>
+  <div class="d-flex gap-2 justify-content-end mt-3">
+    <a href="{% url 'administracion:auditoria' %}" class="btn btn-link text-decoration-none"><i class="bi bi-x-circle"></i> Limpiar</a>
+    <button type="submit" class="btn btn-epp px-4"><i class="bi bi-funnel me-1"></i>Filtrar</button>
+  </div>
+</form>
+
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Fecha y hora</th><th>Actor</th><th>Acción</th><th>Elemento · registro</th><th>Descripción</th><th></th></tr></thead>
+    <tbody>
+      {% for e in pagina %}
+      <tr>
+        <td class="text-nowrap text-muted-epp">{{ e.fecha_hora|date:"d/m/Y H:i" }}</td>
+        <td><span class="principal">{% if e.usuario %}{{ e.usuario.nombres }} {{ e.usuario.apellidos }}{% else %}Sistema{% endif %}</span><span class="d-block small text-muted-epp">{{ e.get_tipo_actor_display }}</span></td>
+        <td><span class="estado{% if e.accion == 'INSERT' %} on{% endif %}"><i class="bi {% if e.accion == 'INSERT' %}bi-plus-circle{% elif e.accion == 'UPDATE' %}bi-pencil-square{% elif e.accion == 'DELETE' %}bi-dash-circle{% else %}bi-box-arrow-in-right{% endif %}"></i> {{ e.accion_texto }}</span></td>
+        <td><span class="fw-medium">{{ e.tabla_texto }}</span>{% if e.id_registro_afectado %} <span class="small text-muted-epp">#{{ e.id_registro_afectado }}</span>{% endif %}</td>
+        <td class="text-muted-epp" style="max-width: 320px">{{ e.descripcion|default:"Sin descripción" }}</td>
+        <td class="text-end"><a href="{% url 'administracion:auditoria_detalle' e.pk %}" class="btn btn-sm btn-epp-outline"><i class="bi bi-eye"></i> Ver</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center text-muted-epp py-5"><i class="bi bi-search fs-4 d-block mb-2"></i>Sin eventos para estos filtros.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pagina.paginator.num_pages > 1 %}
+<nav class="d-flex justify-content-between align-items-center mt-3 small">
+  <span class="text-muted-epp">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }} · {{ pagina.paginator.count }} eventos</span>
+  <div class="d-flex gap-2">
+    {% if pagina.has_previous %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    {% if pagina.has_next %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+  </div>
+</nav>
+{% endif %}
+{% endblock %}

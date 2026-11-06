@@ -24,5 +24,7 @@ urlpatterns = [
     path("modelo-vision/nuevo/", views.modelo_editar, name="modelo_nuevo"),
     path("modelo-vision/<int:pk>/", views.modelo_editar, name="modelo_editar"),
     path("modelo-vision/<int:pk>/activar/", views.modelo_activar, name="modelo_activar"),
+    path("auditoria/", views.auditoria, name="auditoria"),  # HU17
+    path("auditoria/<int:pk>/", views.auditoria_detalle, name="auditoria_detalle"),
     path("<str:tipo>/<int:pk>/activo/", views.cambiar_activo, name="cambiar_activo"),
 ]

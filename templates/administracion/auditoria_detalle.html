@@ -1,0 +1,39 @@
+{% extends "administracion/_base.html" %}
+{% block titulo %}Evento de auditoría #{{ evento.pk }}{% endblock %}
+{% block contenido %}
+<a href="{% url 'administracion:auditoria' %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Auditoría</a>
+<div class="encabezado-pagina mt-2"><div><h1>Evento de auditoría #{{ evento.pk }}</h1><p>Solo lectura.</p></div></div>
+
+<div class="tarjeta p-3 p-md-4" style="max-width: 900px">
+  <dl class="row g-3 small mb-4">
+    <div class="col-md-6"><dt class="text-muted-epp fw-normal">Fecha y hora</dt><dd class="fw-semibold mb-0">{{ evento.fecha_hora|date:"d/m/Y H:i:s" }}</dd></div>
+    <div class="col-md-6"><dt class="text-muted-epp fw-normal">Actor</dt><dd class="fw-semibold mb-0">{% if evento.usuario %}{{ evento.usuario.nombres }} {{ evento.usuario.apellidos }}{% else %}Sistema{% endif %} ({{ evento.get_tipo_actor_display }})</dd></div>
+    <div class="col-md-6"><dt class="text-muted-epp fw-normal">Elemento afectado</dt><dd class="fw-semibold mb-0">{{ tabla }}</dd></div>
+    <div class="col-md-6"><dt class="text-muted-epp fw-normal">Registro afectado</dt><dd class="fw-semibold mb-0">{% if evento.id_registro_afectado %}#{{ evento.id_registro_afectado }}{% else %}No aplica{% endif %}</dd></div>
+    <div class="col-md-6"><dt class="text-muted-epp fw-normal">Acción</dt><dd class="fw-semibold mb-0">{{ accion }}</dd></div>
+    <div class="col-12"><dt class="text-muted-epp fw-normal">Descripción</dt><dd class="mb-0">{{ evento.descripcion|default:"Sin descripción" }}</dd></div>
+  </dl>
+
+  <div class="aviso mb-4" style="background: var(--epp-accent-soft); border: 1px solid rgba(251, 126, 0, .4)">
+    <div class="small fw-semibold text-uppercase text-primary mb-1">Qué pasó</div>
+    <ul class="mb-0 ps-3">{% for frase in resumen %}<li>{{ frase }}</li>{% endfor %}</ul>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="small fw-semibold text-uppercase text-primary mb-1">Antes</div>
+      <div class="p-3 rounded-3 border" style="background: var(--epp-soft); min-height: 64px">
+        {% for campo, valor in antes %}<div class="mb-2"><div class="small text-muted-epp">{{ campo }}</div><div class="fw-medium">{{ valor }}</div></div>
+        {% empty %}<p class="fst-italic text-muted-epp mb-0">{% if evento.accion == "INSERT" %}No existía: es un registro nuevo.{% else %}Sin datos previos.{% endif %}</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="small fw-semibold text-uppercase text-primary mb-1">Después</div>
+      <div class="p-3 rounded-3 border" style="background: var(--epp-soft); min-height: 64px">
+        {% for campo, valor in despues %}<div class="mb-2"><div class="small text-muted-epp">{{ campo }}</div><div class="fw-medium">{{ valor }}</div></div>
+        {% empty %}<p class="fst-italic text-muted-epp mb-0">{% if evento.accion == "DELETE" %}El registro ya no existe.{% else %}Sin datos nuevos.{% endif %}</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
