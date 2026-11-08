@@ -14,7 +14,16 @@
   {% if pestana == "reincidentes" %}
     <a href="{% url 'historial:reincidentes_csv' %}?{{ parametros_url }}" class="btn btn-epp-outline px-3{% if not reincidentes %} disabled{% endif %}"><i class="bi bi-download me-1"></i>Descargar reincidentes (CSV)</a>
   {% endif %}
-  {# HU11: aquí irá el botón "Exportar CSV" de registros #}
+  {% if pestana != "reincidentes" %}
+    {# HU11: exporta todas las filas de la consulta filtrada (no solo la página visible) #}
+    {% if pagina.paginator.count %}
+      <a href="{% if modo == 'incidencias' %}{% url 'historial:incidencias_csv' %}{% else %}{% url 'historial:registros_csv' %}{% endif %}?{{ parametros_url }}"
+         class="btn btn-epp-outline px-3" title="Descarga {{ pagina.paginator.count }} fila{{ pagina.paginator.count|pluralize }} con los filtros actuales">
+        <i class="bi bi-filetype-csv me-1"></i>Exportar CSV ({{ pagina.paginator.count }})</a>
+    {% else %}
+      <span class="btn btn-epp-outline px-3 disabled" aria-disabled="true" title="No hay registros para exportar"><i class="bi bi-filetype-csv me-1"></i>Exportar CSV</span>
+    {% endif %}
+  {% endif %}
 </div>
 
 {% if modo == "incidencias" %}
