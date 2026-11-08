@@ -19,6 +19,7 @@
   .resultado-final.cumple { background: #f0fdf4; color: var(--epp-ok); border: 1px solid rgba(21, 128, 61, .4); }
   .resultado-final.no-cumple { background: var(--epp-bad-soft); color: var(--epp-bad); border: 1px solid rgba(185, 28, 28, .3); }
   .progress-bar { background: var(--epp-primary); transition: width .2s linear; }
+  .aviso-ok { background: #f0fdf4; color: var(--epp-ok); border: 1px solid rgba(21, 128, 61, .3); }
   .paso { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--epp-primary); color: #fff; font-size: .8rem; font-weight: 700; margin-right: .4rem; }
 </style>
 {% endblock %}
@@ -112,6 +113,8 @@
         </div>
       </div>
       <div id="resultadoFinal" class="resultado-final mt-3 d-none" aria-live="assertive"></div>
+      <!-- HU08: estado del registro de la validación -->
+      <div id="registroValidacion" class="mt-3" aria-live="polite"></div>
       <button id="btnReintentar" type="button" class="btn btn-epp w-100 mt-3 d-none"><i class="bi bi-arrow-repeat me-1"></i>Verificar de nuevo</button>
 
       <button id="btnTerminar" type="button" class="btn btn-epp-outline w-100 mt-3"><i class="bi bi-arrow-left me-1"></i>Siguiente estudiante</button>
@@ -129,9 +132,11 @@
     urlIdentificar: "{% url 'verificacion:identificar' %}",
     urlDetectar: "{% url 'verificacion:detectar' %}",
     urlEvaluar: "{% url 'verificacion:evaluar' %}",
+    urlRegistrar: "{% url 'verificacion:registrar' %}",
     csrf: "{{ csrf_token }}",
   };
 </script>
 <script src="{% static 'js/lector_qr.js' %}?v=3"></script>
-<script src="{% static 'js/deteccion_epp.js' %}?v=2"></script>
+<script src="{% static 'js/deteccion_epp.js' %}?v=3"></script>
+<script src="{% static 'js/registro_validacion.js' %}?v=1"></script>
 {% endblock %}

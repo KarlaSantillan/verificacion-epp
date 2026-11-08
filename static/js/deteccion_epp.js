@@ -270,7 +270,8 @@
       });
       const datos = await respuesta.json();
       if (!datos.ok) throw new Error(datos.mensaje);
-      mostrarResultado(datos);
+      // HU08 necesita las confianzas y el laboratorio para guardar la validación.
+      mostrarResultado({ ...datos, confianzas, laboratorio: selLaboratorio.value });
     } catch (e) {
       avisar("aviso-error", `<i class="bi bi-x-octagon me-1"></i>No se pudo calcular el resultado. ${texto(e.message || "")}`);
       reiniciarEvaluacion();
@@ -289,7 +290,7 @@
     progreso.classList.add("d-none");
     btnReintentar.classList.remove("d-none");
     pintarListaFinal(datos.detalles);
-    // HU08 se conectará aquí: registrar el ingreso "Cumple" o el intento "No cumple".
+    // HU08 (registro_validacion.js) escucha este evento para guardar la validación.
     document.dispatchEvent(new CustomEvent("epp:resultado", { detail: datos }));
   }
 
