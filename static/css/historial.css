@@ -1,0 +1,25 @@
+/* Registros, incidencias y corrección (HU10 / HU09) – estilo del prototipo */
+.resultado { display: inline-flex; align-items: center; gap: .3rem; border-radius: 999px; padding: .15rem .65rem; font-size: .75rem; font-weight: 600; white-space: nowrap; }
+.resultado.cumple { background: #f0fdf4; color: var(--epp-ok); box-shadow: inset 0 0 0 1px rgba(21, 128, 61, .25); }
+.resultado.no-cumple { background: var(--epp-bad-soft); color: var(--epp-bad); box-shadow: inset 0 0 0 1px rgba(185, 28, 28, .25); }
+.resultado.corregida { background: #f5f0fa; color: #6b3f8f; box-shadow: inset 0 0 0 1px rgba(107, 63, 143, .2); font-weight: 500; }
+
+.chips { display: flex; gap: .5rem; overflow-x: auto; padding-bottom: .25rem; margin-bottom: 1.25rem; }
+.chips a { flex-shrink: 0; border-radius: 999px; padding: .45rem 1rem; font-size: .875rem; font-weight: 500; border: 1px solid var(--epp-neutral); color: var(--epp-primary); text-decoration: none; }
+.chips a.activo { background: var(--epp-accent-soft); color: var(--epp-ink); border-color: var(--epp-accent); }
+
+.fila-epp { display: grid; grid-template-columns: auto 1.3fr 1fr 1fr .9fr auto; align-items: center; gap: .75rem; padding: .75rem; border: 1px solid var(--epp-neutral); border-radius: 10px; font-size: .85rem; }
+.fila-epp + .fila-epp { margin-top: .5rem; }
+@media (max-width: 767px) { .fila-epp { grid-template-columns: auto 1fr; } .fila-epp > :nth-child(n+3) { grid-column: 1 / -1; } }
+.final-si { color: var(--epp-ok); font-weight: 600; }
+.final-no { color: var(--epp-bad); font-weight: 600; }
+
+.linea-tiempo { list-style: none; margin: 0; padding: 0 0 0 1rem; border-left: 2px solid rgba(107, 63, 143, .2); }
+.linea-tiempo li { position: relative; margin-bottom: .9rem; font-size: .875rem; }
+.linea-tiempo li::before { content: ""; position: absolute; left: -1.43rem; top: .3rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #6b3f8f; background: #fff; }
+
+.opcion-valor { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.opcion-valor label { display: flex; align-items: center; justify-content: center; gap: .4rem; min-height: 44px; border-radius: 10px; border: 1px solid var(--epp-neutral); color: var(--epp-primary); font-weight: 500; cursor: pointer; }
+.opcion-valor input { position: absolute; opacity: 0; }
+.opcion-valor input:checked + label { background: var(--epp-accent-soft); color: var(--epp-ink); box-shadow: inset 0 0 0 2px var(--epp-primary); }
+.opcion-valor input:focus-visible + label { outline: 2px solid var(--epp-accent); outline-offset: 2px; }

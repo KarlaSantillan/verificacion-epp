@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Corregir detección · {{ detalle.epp.nombre }}{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=1">
+{% endblock %}
+{% block contenido %}
+<a href="{% url 'historial:detalle' validacion.pk %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Validación #{{ validacion.pk }}</a>
+<div class="encabezado-pagina mt-2"><div><h1>Corregir detección · {{ detalle.epp.nombre }}</h1>
+  <p>Valor actual: <strong>{{ detalle.detectado_final|yesno:"Detectado,No detectado" }}</strong> · Original del modelo: {{ detalle.detectado_modelo|yesno:"Detectado,No detectado" }}</p></div></div>
+
+<form method="post" novalidate class="tarjeta p-3 p-md-4" style="max-width: 620px">
+  {% csrf_token %}
+  {% if error %}<div class="aviso aviso-error mb-3" role="alert"><i class="bi bi-exclamation-octagon me-1"></i>{{ error }}</div>{% endif %}
+
+  <fieldset class="mb-3">
+    <legend class="form-label small fw-semibold mb-1">Nuevo valor</legend>
+    <div class="opcion-valor">
+      <div><input type="radio" id="valorSi" name="valor_nuevo" value="1"{% if valor_nuevo %} checked{% endif %}><label for="valorSi"><i class="bi bi-check-circle"></i> Detectado</label></div>
+      <div><input type="radio" id="valorNo" name="valor_nuevo" value="0"{% if not valor_nuevo %} checked{% endif %}><label for="valorNo"><i class="bi bi-x-circle"></i> No detectado</label></div>
+    </div>
+  </fieldset>
+
+  <div class="aviso aviso-info mb-3" id="tipoError">
+    <strong>Tipo de error: {{ tipo }}.</strong>
+    {% if tipo == "Falso positivo" %}El modelo detectó un EPP que no estaba presente.{% else %}El modelo no detectó un EPP que sí estaba presente.{% endif %}
+  </div>
+
+  <div class="mb-3">
+    <label for="observacion" class="form-label small fw-semibold mb-1">Observación (obligatoria) *</label>
+    <textarea id="observacion" name="observacion" rows="3" class="form-control" placeholder="Explique el motivo de la corrección.">{{ observacion }}</textarea>
+  </div>
+
+  <div class="aviso aviso-info small mb-3"><i class="bi bi-info-circle me-1"></i>El resultado final se recalcula. El resultado original del modelo no cambia y la corrección queda en la auditoría.</div>
+
+  <div class="d-flex gap-2 justify-content-end">
+    <a href="{% url 'historial:detalle' validacion.pk %}" class="btn btn-epp-outline px-4">Cancelar</a>
+    <button type="submit" class="btn btn-epp px-4">Guardar corrección</button>
+  </div>
+</form>
+
+<script>
+  // Actualiza el tipo de error según la opción elegida (antes de guardar).
+  (function () {
+    const actual = {{ detalle.detectado_final|yesno:"true,false" }};
+    const caja = document.getElementById("tipoError");
+    document.querySelectorAll('input[name="valor_nuevo"]').forEach((opcion) => {
+      opcion.addEventListener("change", () => {
+        const nuevo = opcion.value === "1";
+        if (nuevo === actual) { caja.innerHTML = "<strong>Sin cambios.</strong> Elija el valor contrario al actual para corregir."; return; }
+        caja.innerHTML = nuevo
+          ? "<strong>Tipo de error: Falso negativo.</strong> El modelo no detectó un EPP que sí estaba presente."
+          : "<strong>Tipo de error: Falso positivo.</strong> El modelo detectó un EPP que no estaba presente.";
+      });
+    });
+  })();
+</script>
+{% endblock %}

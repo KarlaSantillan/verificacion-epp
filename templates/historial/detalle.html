@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static admin_epp %}
+{% block titulo %}Validación #{{ validacion.pk }}{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=1">
+{% endblock %}
+{% block contenido %}
+<a href="{% if volver %}{{ volver }}{% else %}{% url 'historial:registros' %}{% endif %}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Volver</a>
+<div class="encabezado-pagina mt-2"><div><h1>Validación #{{ validacion.pk }}</h1></div></div>
+
+<div class="tarjeta p-3 p-md-4 mb-3">
+  <dl class="row g-3 small mb-0">
+    <div class="col-md-4"><dt class="text-muted-epp fw-normal">Estudiante</dt><dd class="fw-semibold text-heading mb-0">{{ validacion.carnet.estudiante }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Laboratorio</dt><dd class="mb-0">{{ validacion.laboratorio.nombre }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Periodo</dt><dd class="mb-0">{{ validacion.periodo.nombre }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Fecha/hora</dt><dd class="mb-0">{{ validacion.fecha_hora|date:"d/m/Y H:i:s" }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Modelo</dt><dd class="mb-0">{{ validacion.modelo }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Supervisor</dt><dd class="mb-0">{{ validacion.usuario_supervisor.nombres }} {{ validacion.usuario_supervisor.apellidos }}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Resultado original (modelo)</dt><dd class="mt-1 mb-0">{% include "historial/_resultado.html" with resultado=validacion.resultado_modelo corregida=False %}</dd></div>
+    <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Resultado final</dt><dd class="mt-1 mb-0">{% include "historial/_resultado.html" with resultado=validacion.resultado_final corregida=validacion.corregida %}</dd></div>
+  </dl>
+</div>
+
+<div class="tarjeta p-3 p-md-4 mb-3">
+  <h2 class="fs-5 fw-semibold text-heading mb-1">Resultados por EPP</h2>
+  <p class="small text-muted-epp">Requisito y umbral guardados al evaluar; no cambian si después se modifica la configuración del laboratorio.</p>
+  {% for d in detalles %}
+  <div class="fila-epp">
+    <span class="text-primary">{% epp_icono d.epp.clase_modelo 24 %}</span>
+    <div><div class="fw-semibold text-heading">{{ d.epp.nombre }}</div><div class="small text-muted-epp">{% if d.requerido %}Requerido{% else %}No requerido{% endif %}</div></div>
+    <div><span class="text-muted-epp">Original:</span> {{ d.detectado_modelo|yesno:"Detectado,No detectado" }}</div>
+    <div class="{% if d.detectado_final %}final-si{% else %}final-no{% endif %}"><span class="text-muted-epp fw-normal">Final:</span> <i class="bi {% if d.detectado_final %}bi-check-circle{% else %}bi-x-circle{% endif %}"></i> {{ d.detectado_final|yesno:"Detectado,No detectado" }}</div>
+    <div><span class="text-muted-epp">Conf./umbral:</span> {% if d.confianza is not None %}{{ d.confianza|porcentaje }}{% else %}—{% endif %} / {{ d.umbral_usado|porcentaje }}</div>
+    <a href="{% url 'historial:corregir' validacion.pk d.pk %}" class="btn btn-sm btn-epp-outline"><i class="bi bi-pencil-square me-1"></i>Corregir detección</a>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="tarjeta p-3 p-md-4">
+  <h2 class="fs-5 fw-semibold text-heading mb-3">Historial de correcciones</h2>
+  {% if correcciones %}
+  <ol class="linea-tiempo">
+    {% for c in correcciones %}
+    <li>
+      <div class="fw-semibold text-heading">{{ c.get_tipo_error_display }} · {{ c.detalle.epp.nombre }}</div>
+      <div class="text-muted-epp">{{ c.valor_anterior|yesno:"Detectado,No detectado" }} → {{ c.valor_nuevo|yesno:"Detectado,No detectado" }} · {{ c.usuario.nombres }} {{ c.usuario.apellidos }} · {{ c.fecha|date:"d/m/Y H:i" }}</div>
+      <div class="mt-1">«{{ c.observacion }}»</div>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}<p class="small text-muted-epp mb-0">Sin correcciones.</p>{% endif %}
+</div>
+{% endblock %}

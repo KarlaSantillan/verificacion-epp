@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}{% if modo == "incidencias" %}Incidencias{% else %}Registros{% endif %}{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=1">
+{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>{% if modo == "incidencias" %}Incidencias{% else %}Registros{% endif %}</h1>
+    <p>{% if modo == "incidencias" %}Validaciones con resultado final “No cumple”.{% else %}Validaciones conformes e intentos no conformes.{% endif %}</p>
+  </div>
+  {# HU11: aquí irá el botón "Exportar CSV" #}
+</div>
+
+<form method="get" class="tarjeta p-3 mb-3">
+  {% if modo == "registros" and filtros.estado %}<input type="hidden" name="estado" value="{{ filtros.estado }}">{% endif %}
+  <div class="row g-2 align-items-end">
+    <div class="col-lg-3">
+      <label class="form-label small mb-1" for="q">Estudiante</label>
+      <div class="position-relative"><i class="bi bi-search position-absolute text-primary" style="left: .75rem; top: .55rem"></i>
+        <input id="q" name="q" value="{{ filtros.q }}" class="form-control ps-5" placeholder="Nombre o cédula"></div>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label small mb-1" for="laboratorio">Laboratorio</label>
+      <select id="laboratorio" name="laboratorio" class="form-select"><option value="">Todos</option>
+        {% for lab in laboratorios %}<option value="{{ lab.pk }}"{% if filtros.laboratorio == lab.pk|stringformat:"s" %} selected{% endif %}>{{ lab.nombre }}</option>{% endfor %}</select>
+    </div>
+    <div class="col-6 col-lg-2">
+      <label class="form-label small mb-1" for="periodo">Periodo</label>
+      <select id="periodo" name="periodo" class="form-select"><option value="">Todos</option>
+        {% for p in periodos %}<option value="{{ p.pk }}"{% if filtros.periodo == p.pk|stringformat:"s" %} selected{% endif %}>{{ p.nombre }}</option>{% endfor %}</select>
+    </div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="desde">Desde</label><input id="desde" type="date" name="desde" value="{{ filtros.desde }}" class="form-control"></div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" value="{{ filtros.hasta }}" class="form-control"></div>
+    <div class="col-lg-1 d-grid"><button type="submit" class="btn btn-epp"><i class="bi bi-funnel"></i><span class="d-lg-none ms-1">Filtrar</span></button></div>
+  </div>
+  <div class="small text-muted-epp mt-2">Fechas en hora de Ecuador (America/Guayaquil).</div>
+</form>
+
+{% if modo == "registros" %}
+<nav class="chips" aria-label="Filtrar por resultado">
+  {% for valor, texto in estados %}
+  <a href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}{% if filtros.laboratorio %}laboratorio={{ filtros.laboratorio }}&{% endif %}{% if filtros.periodo %}periodo={{ filtros.periodo }}&{% endif %}{% if filtros.desde %}desde={{ filtros.desde }}&{% endif %}{% if filtros.hasta %}hasta={{ filtros.hasta }}&{% endif %}estado={{ valor }}"
+     class="{% if filtros.estado == valor %}activo{% endif %}" aria-pressed="{% if filtros.estado == valor %}true{% else %}false{% endif %}">{% if filtros.estado == valor %}<i class="bi bi-check2"></i> {% endif %}{{ texto }}</a>
+  {% endfor %}
+</nav>
+{% endif %}
+
+{% if pagina.paginator.count %}
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Fecha/hora</th><th>Estudiante</th><th>Laboratorio</th><th>Resultado final</th><th>Faltantes</th><th></th></tr></thead>
+    <tbody>
+      {% for v in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ v.fecha_hora|date:"d/m/Y H:i" }}</td>
+        <td class="principal">{{ v.carnet.estudiante }}</td>
+        <td class="text-muted-epp">{{ v.laboratorio.nombre }}</td>
+        <td>{% include "historial/_resultado.html" with resultado=v.resultado_final corregida=v.corregida %}</td>
+        <td class="text-muted-epp">{{ v.faltantes|join:", "|default:"—" }}</td>
+        <td class="text-end"><a href="{% url 'historial:detalle' v.pk %}?volver={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-link text-decoration-none">Ver detalle</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<nav class="d-flex justify-content-between align-items-center mt-3 small">
+  <span class="text-muted-epp">{{ pagina.paginator.count }} {% if modo == "incidencias" %}incidencia{{ pagina.paginator.count|pluralize }}{% else %}registro{{ pagina.paginator.count|pluralize }}{% endif %}{% if pagina.paginator.num_pages > 1 %} · página {{ pagina.number }} de {{ pagina.paginator.num_pages }}{% endif %}</span>
+  <div class="d-flex gap-2">
+    {% if pagina.has_previous %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    {% if pagina.has_next %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+  </div>
+</nav>
+{% else %}
+<div class="tarjeta p-5 text-center">
+  <i class="bi bi-journal-text fs-2 text-primary"></i>
+  <h2 class="fs-5 fw-semibold text-heading mt-2">Sin registros</h2>
+  <p class="text-muted-epp">{% if hay_filtros %}No hay validaciones que coincidan con la búsqueda y los filtros actuales.{% else %}Todavía no hay validaciones registradas.{% endif %}</p>
+  {% if hay_filtros %}<a href="{% if modo == 'incidencias' %}{% url 'historial:incidencias' %}{% else %}{% url 'historial:registros' %}{% endif %}" class="btn btn-epp-outline px-4">Limpiar filtros</a>{% endif %}
+</div>
+{% endif %}
+{% endblock %}

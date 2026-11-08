@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "auditoria",
     "core",
     "administracion",
+    "historial",
 ]
 
 MIDDLEWARE = [
