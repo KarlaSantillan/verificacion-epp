@@ -65,18 +65,32 @@
   }
 
   // ---------- Paso 1 → Paso 2
+  // Aviso único bajo el botón cuando el laboratorio no tiene EPP obligatorios (HU12-CA04).
+  const avisoSinEpp = document.createElement("div");
+  avisoSinEpp.className = "aviso aviso-warn small mt-2 d-none";
+  avisoSinEpp.textContent = "El laboratorio seleccionado no tiene EPP obligatorios configurados. Elija otro laboratorio.";
+  btnVerificarEpp.insertAdjacentElement("afterend", avisoSinEpp);
+
+  function tieneObligatorios() {
+    return laboratorioActual().requisitos.some((r) => r.obligatorio);
+  }
+
+  // El botón solo se habilita con un estudiante identificado y un laboratorio con EPP obligatorios.
+  function actualizarBoton() {
+    const sinEpp = !tieneObligatorios();
+    btnVerificarEpp.disabled = !estudiante || sinEpp;
+    avisoSinEpp.classList.toggle("d-none", !(estudiante && sinEpp));
+  }
+
   document.addEventListener("epp:identificacion", (evento) => {
     const datos = evento.detail;
     estudiante = datos.ok ? datos.estudiante : null;
-    btnVerificarEpp.disabled = !estudiante;
+    actualizarBoton();
   });
+  selLaboratorio.addEventListener("change", actualizarBoton);
 
   btnVerificarEpp.addEventListener("click", async () => {
-    if (!estudiante) return;
-    if (!laboratorioActual().requisitos.some((r) => r.obligatorio)) {
-      $("resultado").insertAdjacentHTML("beforeend", '<div class="aviso aviso-warn mt-3">El laboratorio seleccionado no tiene EPP obligatorios configurados.</div>');
-      return;
-    }
+    if (!estudiante || !tieneObligatorios()) return;
     await window.EPP.detenerLector();
     pasoIdentificacion.classList.add("d-none");
     pasoDeteccion.classList.remove("d-none");
@@ -89,8 +103,8 @@
   btnTerminar.addEventListener("click", () => {
     detener();
     estudiante = null;
-    btnVerificarEpp.disabled = true;
     selLaboratorio.disabled = false;
+    actualizarBoton();
     pasoDeteccion.classList.add("d-none");
     pasoIdentificacion.classList.remove("d-none");
     $("resultado").textContent = "Esperando la lectura del código QR…";
