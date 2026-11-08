@@ -1,0 +1,37 @@
+<div class="row g-3 mb-3">
+  <div class="col-md-4"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono" style="background: var(--epp-bad-soft); color: var(--epp-bad)"><i class="bi bi-exclamation-octagon"></i></span><div><div class="small text-muted-epp">Requieren llamado de atención</div><div class="fs-4 fw-semibold">{{ totales.requiere }}</div></div></div></div>
+  <div class="col-md-4"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono" style="background: var(--epp-warn-soft); color: var(--epp-warn)"><i class="bi bi-eye"></i></span><div><div class="small text-muted-epp">En observación</div><div class="fs-4 fw-semibold">{{ totales.observacion }}</div></div></div></div>
+  <div class="col-md-4"><div class="tarjeta p-3 d-flex gap-3 align-items-center"><span class="icono" style="background: #f0fdf4; color: var(--epp-ok)"><i class="bi bi-check2-circle"></i></span><div><div class="small text-muted-epp">Llamados registrados</div><div class="fs-4 fw-semibold">{{ totales.registrado }}</div></div></div></div>
+</div>
+<div class="aviso aviso-info mb-3"><i class="bi bi-info-circle me-1"></i><strong>Criterio de reincidencia.</strong>
+  Se considera reincidente a un estudiante con {{ umbral }} o más incidencias en el periodo{% if periodo_actual %} ({{ periodo_actual.nombre }}){% endif %}. Las incidencias corregidas por el docente no se cuentan. Después de un llamado, el conteo se reinicia.</div>
+
+{% if reincidentes %}
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Estudiante</th><th>Incidencias en el periodo</th><th>Desde el último llamado</th><th>EPP más faltante</th><th>Última incidencia</th><th>Estado</th><th></th></tr></thead>
+    <tbody>
+      {% for r in reincidentes %}
+      <tr>
+        <td class="principal">{{ r.estudiante }}</td>
+        <td>{{ r.total }}</td>
+        <td class="fw-semibold">{{ r.desde_ultimo_llamado }}</td>
+        <td class="text-muted-epp">{{ r.epp_mas_faltante|default:"—" }}</td>
+        <td class="text-nowrap">{{ r.ultima_incidencia|date:"d/m/Y H:i" }}</td>
+        <td><span class="estado-reinc {% if r.estado == 'Requiere llamado de atención' %}requiere{% elif r.estado == 'En observación' %}observacion{% else %}registrado{% endif %}">{{ r.estado }}</span></td>
+        <td class="text-end text-nowrap">
+          <a href="{% url 'historial:reincidente' r.estudiante.pk %}?periodo={{ periodo_actual.pk }}" class="btn btn-sm btn-link text-decoration-none">Ver historial</a>
+          {% if r.requiere_llamado %}<a href="{% url 'historial:llamado' r.estudiante.pk %}?periodo={{ periodo_actual.pk }}" class="btn btn-sm btn-epp-outline"><i class="bi bi-megaphone me-1"></i>Registrar llamado de atención</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="tarjeta p-5 text-center">
+  <i class="bi bi-people fs-2 text-primary"></i>
+  <h2 class="fs-5 fw-semibold text-heading mt-2">Sin reincidentes</h2>
+  <p class="text-muted-epp mb-0">{% if periodo_actual %}Ningún estudiante alcanza el umbral de incidencias en este periodo.{% else %}No hay periodos académicos registrados.{% endif %}</p>
+</div>
+{% endif %}

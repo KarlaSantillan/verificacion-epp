@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Historial de {{ estudiante }}{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=2">
+{% endblock %}
+{% block contenido %}
+<a href="{% url 'historial:incidencias' %}?tab=reincidentes&periodo={{ periodo.pk }}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Estudiantes reincidentes</a>
+<div class="encabezado-pagina mt-2">
+  <div><h1>Historial del estudiante</h1><p>Periodo {{ periodo.nombre }}</p></div>
+  {% if situacion.requiere_llamado %}<a href="{% url 'historial:llamado' estudiante.pk %}?periodo={{ periodo.pk }}" class="btn btn-epp px-3"><i class="bi bi-megaphone me-1"></i>Registrar llamado de atención</a>{% endif %}
+</div>
+
+<div class="tarjeta p-3 p-md-4 mb-3">
+  <dl class="row g-3 small mb-0">
+    <div class="col-md-5"><dt class="text-muted-epp fw-normal">Estudiante</dt><dd class="fw-semibold text-heading mb-0">{{ estudiante }}</dd></div>
+    <div class="col-6 col-md-2"><dt class="text-muted-epp fw-normal">Cédula</dt><dd class="mb-0">{{ cedula|default:"Dato no disponible" }}</dd></div>
+    <div class="col-6 col-md-3"><dt class="text-muted-epp fw-normal">Carrera</dt><dd class="mb-0">{{ estudiante.carrera|default:"Dato no disponible" }}</dd></div>
+    <div class="col-md-2"><dt class="text-muted-epp fw-normal">Estado</dt><dd class="mb-0">{% if situacion %}<span class="estado-reinc {% if situacion.estado == 'Requiere llamado de atención' %}requiere{% elif situacion.estado == 'En observación' %}observacion{% else %}registrado{% endif %}">{{ situacion.estado }}</span>{% else %}—{% endif %}</dd></div>
+  </dl>
+</div>
+
+<div class="tarjeta p-3 p-md-4 mb-3">
+  <h2 class="fs-5 fw-semibold text-heading mb-3">Incidencias del periodo ({{ incidencias|length }})</h2>
+  {% for v in incidencias %}
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-2 border-bottom small">
+    <div><div class="fw-semibold text-heading">{{ v.fecha_hora|date:"d/m/Y H:i" }} · {{ v.laboratorio.nombre }}</div><div class="text-muted-epp">Falta: {{ v.faltantes|join:", "|default:"—" }}</div></div>
+    <a href="{% url 'historial:detalle' v.pk %}?volver={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-link text-decoration-none">Ver detalle #{{ v.pk }}</a>
+  </div>
+  {% empty %}<p class="small text-muted-epp mb-0">Sin incidencias en este periodo.</p>{% endfor %}
+</div>
+
+<div class="tarjeta p-3 p-md-4">
+  <h2 class="fs-5 fw-semibold text-heading mb-3">Llamados anteriores</h2>
+  {% for l in llamados %}
+  <div class="p-3 border rounded-3 mb-2 small">
+    <div class="fw-semibold text-heading">{{ l.fecha_hora|date:"d/m/Y H:i" }} · {{ l.usuario.nombres }} {{ l.usuario.apellidos }}</div>
+    <div class="text-muted-epp">{{ l.cantidad_incidencias }} incidencia{{ l.cantidad_incidencias|pluralize }} considerada{{ l.cantidad_incidencias|pluralize }}</div>
+    <div class="mt-1">«{{ l.observacion }}»</div>
+  </div>
+  {% empty %}<p class="small text-muted-epp mb-0">Sin llamados de atención en este periodo.</p>{% endfor %}
+</div>
+{% endblock %}

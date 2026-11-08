@@ -1,0 +1,7 @@
+{% comment %}Aviso en la página de inicio (HU15 / RF12-CA01).{% endcomment %}
+{% if total_notificaciones %}
+<div class="aviso aviso-error d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4" role="alert">
+  <div><i class="bi bi-exclamation-octagon me-1"></i><strong>{{ total_notificaciones }} estudiante{{ total_notificaciones|pluralize }}</strong> requiere{{ total_notificaciones|pluralize:"n" }} llamado de atención por reincidencia.</div>
+  <a href="{% url 'historial:incidencias' %}?tab=reincidentes" class="btn btn-sm btn-epp">Atender</a>
+</div>
+{% endif %}

@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
 from configuracion.models import Epp, Laboratorio, LaboratorioEpp, ModeloVision
+from seguimiento.reincidencia import situacion_estudiante
 from estudiantes.servicios import (
     QRNoValido,
     identificar_por_codigo,
@@ -83,6 +84,7 @@ def identificar(request):
     if carnet is None:  # el SGA indicó que el carné no es válido
         return JsonResponse({"ok": False, "estado": resultado.estado, "mensaje": resultado.mensaje})
     estudiante = carnet.estudiante
+    situacion = situacion_estudiante(estudiante)  # HU15 / RF12-CA04: aviso sin bloquear la verificación
     return JsonResponse(
         {
             "ok": resultado.permite_verificar,
@@ -100,5 +102,6 @@ def identificar(request):
                 "carrera": estudiante.carrera,
                 "nivel": estudiante.nivel,
             },
+            "reincidencia": {"estado": situacion.estado, "incidencias": situacion.desde_ultimo_llamado} if situacion else None,
         }
     )

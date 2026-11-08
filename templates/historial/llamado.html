@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Registrar llamado de atención{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=2">
+{% endblock %}
+{% block contenido %}
+<a href="{% url 'historial:incidencias' %}?tab=reincidentes&periodo={{ periodo.pk }}" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Estudiantes reincidentes</a>
+<div class="encabezado-pagina mt-2"><div><h1>Registrar llamado de atención</h1><p>{{ estudiante }} · Periodo {{ periodo.nombre }}</p></div></div>
+
+<form method="post" novalidate class="tarjeta p-3 p-md-4" style="max-width: 640px">
+  {% csrf_token %}
+  {% if error %}<div class="aviso aviso-error mb-3" role="alert"><i class="bi bi-exclamation-octagon me-1"></i>{{ error }}</div>{% endif %}
+  {% if situacion %}
+  <dl class="row g-2 small mb-3">
+    <div class="col-6"><dt class="text-muted-epp fw-normal">Incidencias desde el último llamado</dt><dd class="fw-semibold mb-0">{{ situacion.desde_ultimo_llamado }}</dd></div>
+    <div class="col-6"><dt class="text-muted-epp fw-normal">EPP más faltante</dt><dd class="fw-semibold mb-0">{{ situacion.epp_mas_faltante|default:"—" }}</dd></div>
+  </dl>
+  {% endif %}
+  <div class="mb-3">
+    <label for="observacion" class="form-label small fw-semibold mb-1">Observación (obligatoria) *</label>
+    <textarea id="observacion" name="observacion" rows="4" class="form-control" placeholder="Describa el llamado de atención realizado al estudiante.">{{ observacion }}</textarea>
+  </div>
+  <div class="aviso aviso-info small mb-3"><i class="bi bi-info-circle me-1"></i>El sistema no contacta al estudiante: registra el llamado que usted realizó. Después, el conteo de incidencias vuelve a empezar.</div>
+  <div class="d-flex gap-2 justify-content-end">
+    <a href="{% url 'historial:incidencias' %}?tab=reincidentes&periodo={{ periodo.pk }}" class="btn btn-epp-outline px-4">Cancelar</a>
+    <button type="submit" class="btn btn-epp px-4">Registrar llamado</button>
+  </div>
+</form>
+{% endblock %}

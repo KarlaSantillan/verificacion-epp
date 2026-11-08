@@ -3,7 +3,7 @@
 {% block titulo %}{% if modo == "incidencias" %}Incidencias{% else %}Registros{% endif %}{% endblock %}
 {% block estilos %}
 <link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
-<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=2">
 {% endblock %}
 {% block contenido %}
 <div class="encabezado-pagina">
@@ -11,17 +11,29 @@
     <h1>{% if modo == "incidencias" %}Incidencias{% else %}Registros{% endif %}</h1>
     <p>{% if modo == "incidencias" %}Validaciones con resultado final “No cumple”.{% else %}Validaciones conformes e intentos no conformes.{% endif %}</p>
   </div>
-  {# HU11: aquí irá el botón "Exportar CSV" #}
+  {% if pestana == "reincidentes" %}
+    <a href="{% url 'historial:reincidentes_csv' %}?{{ parametros_url }}" class="btn btn-epp-outline px-3{% if not reincidentes %} disabled{% endif %}"><i class="bi bi-download me-1"></i>Descargar reincidentes (CSV)</a>
+  {% endif %}
+  {# HU11: aquí irá el botón "Exportar CSV" de registros #}
 </div>
+
+{% if modo == "incidencias" %}
+<nav class="pestanas-linea mb-4" role="tablist">
+  <a href="{% url 'historial:incidencias' %}" role="tab" class="{% if pestana != 'reincidentes' %}activa{% endif %}" aria-selected="{% if pestana != 'reincidentes' %}true{% else %}false{% endif %}">Intentos no conformes</a>
+  <a href="{% url 'historial:incidencias' %}?tab=reincidentes" role="tab" class="{% if pestana == 'reincidentes' %}activa{% endif %}" aria-selected="{% if pestana == 'reincidentes' %}true{% else %}false{% endif %}">Estudiantes reincidentes</a>
+</nav>
+{% endif %}
 
 <form method="get" class="tarjeta p-3 mb-3">
   {% if modo == "registros" and filtros.estado %}<input type="hidden" name="estado" value="{{ filtros.estado }}">{% endif %}
+  {% if pestana == "reincidentes" %}<input type="hidden" name="tab" value="reincidentes">{% endif %}
   <div class="row g-2 align-items-end">
     <div class="col-lg-3">
       <label class="form-label small mb-1" for="q">Estudiante</label>
       <div class="position-relative"><i class="bi bi-search position-absolute text-primary" style="left: .75rem; top: .55rem"></i>
         <input id="q" name="q" value="{{ filtros.q }}" class="form-control ps-5" placeholder="Nombre o cédula"></div>
     </div>
+    {% if pestana == "reincidentes" %}<div class="d-none d-lg-block col-lg-4"></div>{% endif %}
     <div class="col-6 col-lg-2">
       <label class="form-label small mb-1" for="laboratorio">Laboratorio</label>
       <select id="laboratorio" name="laboratorio" class="form-select"><option value="">Todos</option>
@@ -29,11 +41,13 @@
     </div>
     <div class="col-6 col-lg-2">
       <label class="form-label small mb-1" for="periodo">Periodo</label>
-      <select id="periodo" name="periodo" class="form-select"><option value="">Todos</option>
+      <select id="periodo" name="periodo" class="form-select"><option value="">{% if pestana == "reincidentes" %}Actual{% else %}Todos{% endif %}</option>
         {% for p in periodos %}<option value="{{ p.pk }}"{% if filtros.periodo == p.pk|stringformat:"s" %} selected{% endif %}>{{ p.nombre }}</option>{% endfor %}</select>
     </div>
+    {% if pestana != "reincidentes" %}
     <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="desde">Desde</label><input id="desde" type="date" name="desde" value="{{ filtros.desde }}" class="form-control"></div>
     <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" value="{{ filtros.hasta }}" class="form-control"></div>
+    {% endif %}
     <div class="col-lg-1 d-grid"><button type="submit" class="btn btn-epp"><i class="bi bi-funnel"></i><span class="d-lg-none ms-1">Filtrar</span></button></div>
   </div>
   <div class="small text-muted-epp mt-2">Fechas en hora de Ecuador (America/Guayaquil).</div>
@@ -48,7 +62,9 @@
 </nav>
 {% endif %}
 
-{% if pagina.paginator.count %}
+{% if pestana == "reincidentes" %}
+  {% include "historial/_reincidentes.html" %}
+{% elif pagina.paginator.count %}
 <div class="tabla-epp table-responsive">
   <table class="table align-middle">
     <thead><tr><th>Fecha/hora</th><th>Estudiante</th><th>Laboratorio</th><th>Resultado final</th><th>Faltantes</th><th></th></tr></thead>
