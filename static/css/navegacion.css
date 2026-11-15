@@ -1,0 +1,13 @@
+/* Navegación suave entre módulos (Chrome y Edge 126 o superior; en otros navegadores no hace nada).
+   En vez del parpadeo en blanco, el contenido cambia con un fundido corto y el menú lateral queda quieto. */
+@view-transition { navigation: auto; }
+
+.sidebar { view-transition-name: menu-lateral; }
+
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: .18s; }
+::view-transition-group(menu-lateral) { animation: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+}
