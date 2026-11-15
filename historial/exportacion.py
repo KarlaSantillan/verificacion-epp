@@ -15,11 +15,12 @@ from django.http import HttpResponse
 from django.utils import timezone
 
 from estudiantes.servicios import ocultar_cedula
+from verificacion.sesion_practica import separar
 
 from .filtros import faltantes
 
 COLUMNAS_FIJAS = [
-    "id_validacion", "fecha", "hora", "estudiante", "cedula", "carrera", "laboratorio", "periodo",
+    "id_validacion", "fecha", "hora", "estudiante", "cedula", "carrera", "laboratorio", "periodo", "materia", "practica",
     "resultado_modelo", "resultado_final", "corregida", "epp_faltantes", "supervisor", "modelo_vision",
 ]
 PELIGROSOS = ("=", "+", "-", "@", "\t", "\r")
@@ -74,6 +75,7 @@ def respuesta_csv(validaciones, prefijo):
                 seguro(estudiante.carrera),
                 seguro(v.laboratorio.nombre),
                 seguro(v.periodo.nombre),
+                *(seguro(texto) for texto in separar(v.observacion)),
                 v.get_resultado_modelo_display(),
                 v.get_resultado_final_display(),
                 "Sí" if v.corregida else "No",

@@ -12,6 +12,7 @@ from estudiantes.models import CarnetEstudiantil
 from .evaluacion import SinRequisitos, evaluar
 from .models import Validacion
 from .registro import RegistroNoPermitido, registrar_validacion
+from .sesion_practica import leer as leer_sesion_practica
 
 CLAVE_SESION = "registros_validacion"  # clave de cada evaluación → id de la validación ya guardada
 
@@ -72,12 +73,13 @@ def registrar(request):
     if not evaluacion.cumple and not datos.get("confirmar_no_conforme"):
         return _error("Un resultado “No cumple” se registra solo al confirmarlo con el botón.")
 
+    practica = leer_sesion_practica(request)  # materia y práctica de la sesión (descriptivas)
     try:
         if evaluacion.cumple:
             with como_sistema():  # registro automático, sin intervención del docente
-                validacion = registrar_validacion(usuario=request.user, carnet=carnet, laboratorio=laboratorio, evaluacion=evaluacion)
+                validacion = registrar_validacion(usuario=request.user, carnet=carnet, laboratorio=laboratorio, evaluacion=evaluacion, **practica)
         else:
-            validacion = registrar_validacion(usuario=request.user, carnet=carnet, laboratorio=laboratorio, evaluacion=evaluacion)
+            validacion = registrar_validacion(usuario=request.user, carnet=carnet, laboratorio=laboratorio, evaluacion=evaluacion, **practica)
     except RegistroNoPermitido as error:
         return _error(str(error))
 

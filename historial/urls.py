@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views, views_exportacion
+from . import views, views_exportacion, views_practica
 
 app_name = "historial"
 
@@ -14,4 +14,5 @@ urlpatterns = [
     path("reincidentes/<int:id_estudiante>/llamado/", views.llamado, name="llamado"),  # HU16
     path("validacion/<int:pk>/", views.detalle, name="detalle"),
     path("validacion/<int:pk>/corregir/<int:id_detalle>/", views.corregir, name="corregir"),
+    path("validacion/<int:pk>/practica/", views_practica.editar_practica, name="editar_practica"),
 ]

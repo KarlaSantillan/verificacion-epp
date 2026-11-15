@@ -1,10 +1,13 @@
 """Filtros del historial (HU10 / RF09). HU11 (exportar CSV) reutiliza filtrar_validaciones()."""
+import re
+
 from django.db.models import Prefetch, Q
 
 from configuracion.models import Laboratorio, PeriodoAcademico
 from verificacion.models import Validacion, ValidacionDetalle
+from verificacion.sesion_practica import separar
 
-CAMPOS = ("q", "laboratorio", "periodo", "desde", "hasta", "estado")
+CAMPOS = ("q", "laboratorio", "periodo", "desde", "hasta", "estado", "materia", "practica")
 ESTADOS = [("", "Todos"), ("conforme", "Cumple"), ("no_conforme", "No cumple"), ("corregidas", "Corregidas")]
 
 
@@ -35,6 +38,12 @@ def filtrar_validaciones(filtros, solo_incidencias=False):
         validaciones = validaciones.filter(fecha_hora__date__gte=filtros["desde"])
     if filtros["hasta"]:
         validaciones = validaciones.filter(fecha_hora__date__lte=filtros["hasta"])
+    # Materia y práctica (asesoría 12/11/2026): se guardan en la observación como
+    # "Materia: ... | Práctica: ..."; coincidencia parcial y sin distinguir mayúsculas.
+    if filtros["materia"]:
+        validaciones = validaciones.filter(observacion__iregex=r"^Materia: [^|]*" + re.escape(filtros["materia"]))
+    if filtros["practica"]:
+        validaciones = validaciones.filter(observacion__iregex=r"\| Práctica: .*" + re.escape(filtros["practica"]))
     if filtros["q"]:  # CA02: nombre, apellido o cédula
         q = filtros["q"]
         estudiante = "carnet__estudiante__"
@@ -49,7 +58,14 @@ def opciones():
         "laboratorios": Laboratorio.objects.order_by("nombre"),
         "periodos": PeriodoAcademico.objects.order_by("-fecha_inicio"),
         "estados": ESTADOS,
+        "materias": _valores_usados(0),  # sugerencias para los filtros
+        "practicas": _valores_usados(1),
     }
+
+
+def _valores_usados(posicion):
+    textos = Validacion.objects.filter(observacion__startswith="Materia: ").values_list("observacion", flat=True).distinct()[:300]
+    return sorted({valor for texto in textos if (valor := separar(texto)[posicion])})[:100]
 
 
 def faltantes(validacion):

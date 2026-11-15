@@ -31,12 +31,30 @@
     <h1 class="fs-3 fw-semibold text-heading mb-1">Verificación en vivo</h1>
     <p class="text-muted-epp mb-0">Identifique al estudiante y luego verifique sus EPP frente a la cámara.</p>
   </div>
-  <div style="min-width: 240px">
-    <label for="laboratorio" class="form-label small mb-1">Laboratorio</label>
-    <select id="laboratorio" class="form-select">
-      {% for laboratorio in laboratorios %}<option value="{{ laboratorio.id }}">{{ laboratorio.nombre }}</option>{% empty %}<option value="">Sin laboratorios activos</option>{% endfor %}
-    </select>
-  </div>
+    <div id="datosSesion" class="d-flex flex-wrap gap-2 align-items-end" data-url="{% url 'verificacion:sesion_practica' %}">
+    <div style="min-width: 220px">
+      <label for="laboratorio" class="form-label small mb-1">Laboratorio</label>
+      <select id="laboratorio" class="form-select">
+        {% for laboratorio in laboratorios %}<option value="{{ laboratorio.id }}">{{ laboratorio.nombre }}</option>{% empty %}<option value="">Sin laboratorios activos</option>{% endfor %}
+      </select>
+    </div>
+      <div style="min-width: 180px">
+        <label for="materia" class="form-label small mb-1">Materia <span class="fw-normal text-muted-epp">(opcional)</span></label>
+        <input id="materia" class="form-control" maxlength="100" list="sugerenciasMateria" autocomplete="off"
+              value="{{ request.session.sesion_practica.materia|default:'' }}" placeholder="Ej.: Microbiología">
+      </div>
+      <div style="min-width: 200px">
+        <label for="practica" class="form-label small mb-1">Práctica <span class="fw-normal text-muted-epp">(opcional)</span></label>
+        <input id="practica" class="form-control" maxlength="150" list="sugerenciasPractica" autocomplete="off"
+              value="{{ request.session.sesion_practica.practica|default:'' }}" placeholder="Ej.: Tinción de Gram">
+      </div>
+      <button id="btnNuevaPractica" type="button" class="btn btn-epp-outline" title="Vaciar materia y práctica para empezar otra clase">
+        <i class="bi bi-plus-circle me-1"></i>Nueva práctica
+      </button>
+      <span id="estadoSesion" class="small text-muted-epp pb-2" aria-live="polite"></span>
+      <datalist id="sugerenciasMateria"></datalist>
+      <datalist id="sugerenciasPractica"></datalist>
+    </div>
 </div>
 
 {% if not modelo_activo %}
@@ -61,7 +79,7 @@
         <div class="col-sm-8">
           <label for="codigoManual" class="form-label small fw-semibold mb-1">¿La cámara no lee el QR? Escriba el código del carné</label>
           <input id="codigoManual" type="text" class="form-control" inputmode="numeric" autocomplete="off"
-                 maxlength="50" placeholder="Ej.: 1234567890123">
+                maxlength="50" placeholder="Ej.: 1234567890123">
         </div>
         <div class="col-sm-4 d-grid">
           <button id="btnCodigo" type="submit" class="btn btn-epp-outline"><i class="bi bi-keyboard me-1"></i>Identificar</button>
@@ -144,4 +162,5 @@
 <script src="{% static 'js/guia_posicion.js' %}?v=1"></script>
 <script src="{% static 'js/registro_validacion.js' %}?v=1"></script>
 <script src="{% static 'js/aviso_reincidente.js' %}?v=1"></script>
+<script src="{% static 'js/sesion_practica.js' %}?v=1"></script>
 {% endblock %}

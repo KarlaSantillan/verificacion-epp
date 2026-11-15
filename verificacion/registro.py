@@ -9,6 +9,7 @@ from django.utils import timezone
 from configuracion.models import ModeloVision, PeriodoAcademico
 
 from .models import Validacion, ValidacionDetalle
+from .sesion_practica import componer
 
 
 class RegistroNoPermitido(Exception):
@@ -20,8 +21,11 @@ def periodo_vigente(fecha=None):
     return PeriodoAcademico.objects.filter(fecha_inicio__lte=hoy, fecha_fin__gte=hoy).order_by("-fecha_inicio").first()
 
 
-def registrar_validacion(*, usuario, carnet, laboratorio, evaluacion):
-    """Crea la validación y su detalle en una sola transacción (todo o nada)."""
+def registrar_validacion(*, usuario, carnet, laboratorio, evaluacion, materia="", practica=""):
+    """Crea la validación y su detalle en una sola transacción (todo o nada).
+
+    materia y practica son descriptivas (las escribe el docente al iniciar la sesión).
+    """
     periodo = periodo_vigente()
     if periodo is None:
         raise RegistroNoPermitido("No hay un periodo académico vigente. El administrador debe registrarlo en Periodos académicos.")
@@ -39,6 +43,7 @@ def registrar_validacion(*, usuario, carnet, laboratorio, evaluacion):
             laboratorio=laboratorio,
             resultado_modelo=resultado,
             resultado_final=resultado,  # cambia solo con una corrección manual (HU09)
+            observacion=componer(materia, practica) or None,  # descriptivo; no cambia la base de datos
         )
         ValidacionDetalle.objects.bulk_create(
             ValidacionDetalle(

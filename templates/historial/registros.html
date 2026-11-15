@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static practica %}
 {% block titulo %}{% if modo == "incidencias" %}Incidencias{% else %}Registros{% endif %}{% endblock %}
 {% block estilos %}
 <link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
@@ -58,6 +58,18 @@
     <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" value="{{ filtros.hasta }}" class="form-control"></div>
     {% endif %}
     <div class="col-lg-1 d-grid"><button type="submit" class="btn btn-epp"><i class="bi bi-funnel"></i><span class="d-lg-none ms-1">Filtrar</span></button></div>
+    {% if pestana != "reincidentes" %}
+        <div class="col-6 col-lg-3">
+          <label class="form-label small mb-1" for="materia">Materia</label>
+          <input id="materia" name="materia" value="{{ filtros.materia }}" class="form-control" list="listaMaterias" placeholder="Todas">
+        </div>
+        <div class="col-6 col-lg-3">
+          <label class="form-label small mb-1" for="practica">Práctica</label>
+          <input id="practica" name="practica" value="{{ filtros.practica }}" class="form-control" list="listaPracticas" placeholder="Todas">
+        </div>
+        <datalist id="listaMaterias">{% for m in materias %}<option value="{{ m }}">{% endfor %}</datalist>
+        <datalist id="listaPracticas">{% for p in practicas %}<option value="{{ p }}">{% endfor %}</datalist>
+        {% endif %}
   </div>
   <div class="small text-muted-epp mt-2">Fechas en hora de Ecuador (America/Guayaquil).</div>
 </form>
@@ -65,7 +77,7 @@
 {% if modo == "registros" %}
 <nav class="chips" aria-label="Filtrar por resultado">
   {% for valor, texto in estados %}
-  <a href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}{% if filtros.laboratorio %}laboratorio={{ filtros.laboratorio }}&{% endif %}{% if filtros.periodo %}periodo={{ filtros.periodo }}&{% endif %}{% if filtros.desde %}desde={{ filtros.desde }}&{% endif %}{% if filtros.hasta %}hasta={{ filtros.hasta }}&{% endif %}estado={{ valor }}"
+  <a href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}{% if filtros.laboratorio %}laboratorio={{ filtros.laboratorio }}&{% endif %}{% if filtros.periodo %}periodo={{ filtros.periodo }}&{% endif %}{% if filtros.desde %}desde={{ filtros.desde }}&{% endif %}{% if filtros.hasta %}hasta={{ filtros.hasta }}&{% endif %}{% if filtros.materia %}materia={{ filtros.materia|urlencode }}&{% endif %}{% if filtros.practica %}practica={{ filtros.practica|urlencode }}&{% endif %}estado={{ valor }}"
      class="{% if filtros.estado == valor %}activo{% endif %}" aria-pressed="{% if filtros.estado == valor %}true{% else %}false{% endif %}">{% if filtros.estado == valor %}<i class="bi bi-check2"></i> {% endif %}{{ texto }}</a>
   {% endfor %}
 </nav>
@@ -82,7 +94,7 @@
       <tr>
         <td class="text-nowrap">{{ v.fecha_hora|date:"d/m/Y H:i" }}</td>
         <td class="principal">{{ v.carnet.estudiante }}</td>
-        <td class="text-muted-epp">{{ v.laboratorio.nombre }}</td>
+        <td class="text-muted-epp">{{ v.laboratorio.nombre }}{% with m=v.observacion|materia p=v.observacion|practica %}{% if m or p %}<div class="small">{{ m }}{% if m and p %} · {% endif %}{{ p }}</div>{% endif %}{% endwith %}</td>
         <td>{% include "historial/_resultado.html" with resultado=v.resultado_final corregida=v.corregida %}</td>
         <td class="text-muted-epp">{{ v.faltantes|join:", "|default:"—" }}</td>
         <td class="text-end"><a href="{% url 'historial:detalle' v.pk %}?volver={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-link text-decoration-none">Ver detalle</a></td>

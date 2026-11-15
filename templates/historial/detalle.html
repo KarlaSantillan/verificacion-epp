@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static admin_epp %}
+{% load static admin_epp practica %}
 {% block titulo %}Validación #{{ validacion.pk }}{% endblock %}
 {% block estilos %}
 <link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
@@ -17,10 +17,28 @@
     <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Fecha/hora</dt><dd class="mb-0">{{ validacion.fecha_hora|date:"d/m/Y H:i:s" }}</dd></div>
     <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Modelo</dt><dd class="mb-0">{{ validacion.modelo }}</dd></div>
     <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Supervisor</dt><dd class="mb-0">{{ validacion.usuario_supervisor.nombres }} {{ validacion.usuario_supervisor.apellidos }}</dd></div>
+    <div class="col-12 col-md-8"><dt class="text-muted-epp fw-normal">Materia · Práctica</dt>
+  <dd class="mb-0">{{ validacion.observacion|materia|default:"—" }} · {{ validacion.observacion|practica|default:"—" }}
+    <button type="button" class="btn btn-sm btn-link p-0 ms-2 text-decoration-none" data-bs-toggle="collapse" data-bs-target="#editarPractica"><i class="bi bi-pencil-square"></i> Editar</button>
+  </dd></div>
     <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Resultado original (modelo)</dt><dd class="mt-1 mb-0">{% include "historial/_resultado.html" with resultado=validacion.resultado_modelo corregida=False %}</dd></div>
     <div class="col-6 col-md-4"><dt class="text-muted-epp fw-normal">Resultado final</dt><dd class="mt-1 mb-0">{% include "historial/_resultado.html" with resultado=validacion.resultado_final corregida=validacion.corregida %}</dd></div>
   </dl>
 </div>
+
+<div id="editarPractica" class="collapse tarjeta p-3 mb-3">
+  <form method="post" action="{% url 'historial:editar_practica' validacion.pk %}" class="row g-2 align-items-end">
+    {% csrf_token %}
+    <input type="hidden" name="volver" value="{{ volver }}">
+    <div class="col-md-5"><label class="form-label small mb-1" for="materia">Materia</label>
+      <input id="materia" name="materia" value="{{ validacion.observacion|materia }}" maxlength="100" class="form-control"></div>
+    <div class="col-md-5"><label class="form-label small mb-1" for="practica">Práctica</label>
+      <input id="practica" name="practica" value="{{ validacion.observacion|practica }}" maxlength="150" class="form-control"></div>
+    <div class="col-md-2 d-grid"><button type="submit" class="btn btn-epp">Guardar</button></div>
+    <p class="small text-muted-epp mb-0">Dato descriptivo: no cambia el resultado. El cambio queda registrado en la auditoría.</p>
+  </form>
+</div>
+
 
 <div class="tarjeta p-3 p-md-4 mb-3">
   <h2 class="fs-5 fw-semibold text-heading mb-1">Resultados por EPP</h2>
