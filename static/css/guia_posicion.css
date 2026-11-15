@@ -1,0 +1,53 @@
+/* Guía de posición para la verificación de EPP */
+
+/* --- Personaje animado (ciclo de 6 s: sube los brazos, saluda, aparece el visto y baja) --- */
+.personaje { width: 100%; height: auto; overflow: visible; }
+.personaje .cuerpo { animation: guia-respira 6s ease-in-out infinite; transform-box: view-box; transform-origin: 100px 240px; }
+.personaje .brazo-sup { transform-box: view-box; transform-origin: 66px 104px; animation: guia-hombro 6s ease-in-out infinite; }
+.personaje .antebrazo { transform-box: view-box; transform-origin: 38px 138px; animation: guia-codo 6s ease-in-out infinite; }
+.personaje .mano { transform-box: view-box; transform-origin: 37px 92px; animation: guia-saludo 6s ease-in-out infinite; }
+.personaje .ojos { transform-box: view-box; transform-origin: 100px 57px; animation: guia-parpadeo 6s infinite; }
+.personaje .visto { animation: guia-visto 6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+
+@keyframes guia-hombro { 0%, 8% { transform: rotate(-34deg); } 30%, 84% { transform: rotate(0); } 100% { transform: rotate(-34deg); } }
+@keyframes guia-codo { 0%, 8% { transform: rotate(-146deg); } 30%, 84% { transform: rotate(0); } 100% { transform: rotate(-146deg); } }
+@keyframes guia-saludo { 0%, 34% { transform: rotate(0); } 40% { transform: rotate(-9deg); } 46% { transform: rotate(7deg); } 52%, 100% { transform: rotate(0); } }
+@keyframes guia-respira { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes guia-parpadeo { 0%, 60%, 64%, 100% { transform: scaleY(1); } 62% { transform: scaleY(.1); } }
+@keyframes guia-visto { 0%, 52% { opacity: 0; transform: scale(.3); } 58% { opacity: 1; transform: scale(1.15); } 62%, 82% { opacity: 1; transform: scale(1); } 90%, 100% { opacity: 0; transform: scale(.6); } }
+
+/* --- Tarjeta bajo el video --- */
+.guia-card { display: flex; align-items: center; gap: 1rem; padding: .75rem 1rem; border: 1px solid var(--epp-neutral); border-radius: 12px; background: var(--epp-soft); }
+.guia-figura { flex: 0 0 96px; }
+.guia-pasos { margin: 0; padding-left: 1.1rem; font-size: .875rem; color: var(--epp-muted); }
+.guia-pasos li { padding: .1rem .35rem; border-radius: 6px; transition: background .3s, color .3s; }
+.guia-pasos li.p1 { animation: guia-paso1 6s infinite; }
+.guia-pasos li.p2 { animation: guia-paso2 6s infinite; }
+.guia-pasos li.p3 { animation: guia-paso3 6s infinite; }
+@keyframes guia-paso1 { 0%, 24% { background: var(--epp-accent-soft); color: var(--epp-ink); } 26%, 100% { background: transparent; color: var(--epp-muted); } }
+@keyframes guia-paso2 { 0%, 24% { background: transparent; color: var(--epp-muted); } 26%, 52% { background: var(--epp-accent-soft); color: var(--epp-ink); } 54%, 100% { background: transparent; color: var(--epp-muted); } }
+@keyframes guia-paso3 { 0%, 52% { background: transparent; color: var(--epp-muted); } 54%, 84% { background: var(--epp-accent-soft); color: var(--epp-ink); } 86%, 100% { background: transparent; color: var(--epp-muted); } }
+
+/* --- Silueta sobre el video (debajo de los recuadros de detección) --- */
+.guia-silueta { position: absolute; inset: 6% 0 0 0; display: flex; justify-content: center; pointer-events: none; opacity: 0; transition: opacity .6s; }
+.guia-silueta svg { height: 100%; width: auto; }
+.guia-silueta .trazo { fill: rgba(255, 255, 255, .07); stroke: rgba(255, 255, 255, .85); stroke-width: 2.2; stroke-dasharray: 7 6; stroke-linecap: round; stroke-linejoin: round; animation: guia-marcha 1.2s linear infinite; }
+.guia-silueta .trazo .brazos { fill: none; stroke-width: 16; stroke: rgba(255, 255, 255, .22); stroke-dasharray: none; }
+.guia-silueta.visible { opacity: 1; }
+.guia-silueta.visible.ok { opacity: 0; transition-delay: .5s; }
+.guia-silueta.ok .trazo { stroke: #4ade80; }
+@keyframes guia-marcha { to { stroke-dashoffset: -26; } }
+
+/* --- Presentación al encender la cámara --- */
+.guia-intro { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(15, 27, 38, .55); z-index: 2; animation: guia-entra .4s ease-out; }
+.guia-intro.salir { opacity: 0; transition: opacity .5s; }
+.guia-intro-caja { width: min(230px, 60%); padding: 1rem 1rem .8rem; border-radius: 16px; background: #fff; text-align: center; color: var(--epp-ink); box-shadow: 0 10px 30px rgba(0, 0, 0, .25); }
+.guia-intro-caja .personaje { max-height: 190px; }
+.guia-intro-caja .small { color: var(--epp-muted); }
+@keyframes guia-entra { from { opacity: 0; transform: scale(.96); } }
+
+/* Sin animaciones si el usuario las tiene desactivadas en su sistema */
+@media (prefers-reduced-motion: reduce) {
+  .personaje *, .guia-pasos li, .guia-silueta .trazo, .guia-intro { animation: none !important; }
+  .personaje .visto { opacity: 1; }
+}
