@@ -27,6 +27,7 @@
   const textoProgreso = $("textoProgreso");
   const barraProgreso = $("barraProgreso");
   const resultadoFinal = $("resultadoFinal");
+  const btnCamara = $("btnCamara");
 
   const ANCHO_ENVIO = 1280; //se envía a 1280 px para no perder detalle en objetos pequeños (gafas).
   const SIN_DETECCION_MS = 1500; // tiempo sin detecciones antes de avisar (HU06-CA03)
@@ -36,6 +37,7 @@
   let estudiante = null;
   let flujo = null;
   let activo = false; // la cámara está encendida
+  let vuelta = 0; // identifica el ciclo de envío vigente (evita dos ciclos al reanudar rápido)
   let pausado = false; // ya hay resultado: no se envían más fotogramas
   let ultimaDeteccion = 0;
   let tiempos = [];
@@ -113,6 +115,29 @@
   // El estudiante corrige sus EPP y se vuelve a evaluar.
   btnReintentar.addEventListener("click", reiniciarEvaluacion);
 
+  // Detener o reanudar la cámara sin salir de la verificación ni recargar la página.
+  btnCamara.addEventListener("click", () => {
+    if (activo || flujo) {
+      detener();
+      if (!pausado) {
+        // Sin resultado todavía: se descarta la cuenta de estabilización en curso.
+        reiniciarCuenta();
+        pintarLista({});
+      }
+      avisar("", "");
+      videoVacio.textContent = "Cámara detenida. Presione «Reanudar cámara» para continuar.";
+      videoVacio.classList.remove("d-none");
+    } else {
+      iniciar();
+    }
+  });
+
+  function botonCamara(encendida) {
+    btnCamara.innerHTML = encendida
+      ? '<i class="bi bi-stop-circle me-1"></i>Detener cámara'
+      : '<i class="bi bi-play-circle me-1"></i>Reanudar cámara';
+  }
+
   function reiniciarEvaluacion() {
     historial = [];
     claveEstable = null;
@@ -136,15 +161,17 @@
       flujo = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
     } catch (e) {
       videoVacio.textContent = "No se pudo acceder a la cámara. Revise que el navegador tenga permiso.";
+      botonCamara(false);
       return;
     }
     video.srcObject = flujo;
     await video.play();
     videoVacio.classList.add("d-none");
     activo = true;
+    botonCamara(true);
     ultimaDeteccion = performance.now();
     tiempos = [];
-    ciclo();
+    ciclo(++vuelta);
   }
 
   function detener() {
@@ -154,6 +181,7 @@
     video.srcObject = null;
     lienzo.getContext("2d").clearRect(0, 0, lienzo.width, lienzo.height);
     velocidad.textContent = "";
+    botonCamara(false);
   }
 
   function fotograma() {
@@ -167,8 +195,8 @@
   const esperar = (ms) => new Promise((r) => setTimeout(r, ms));
 
   // Un fotograma a la vez: se envía el siguiente cuando llega la respuesta del anterior.
-  async function ciclo() {
-    while (activo) {
+  async function ciclo(id) {
+    while (activo && id === vuelta) {
       if (!video.videoWidth || pausado) {
         await esperar(100);
         continue;
@@ -183,7 +211,7 @@
           body: datos,
         });
         const resultado = await respuesta.json();
-        if (!activo || pausado) continue;
+        if (!activo || id !== vuelta || pausado) continue;
         if (!resultado.ok) {
           // HU06-CA03 / RF05-CA04: servicio no disponible → mensaje, sin resultado ni registro.
           avisar("aviso-error", `<i class="bi bi-x-octagon me-1"></i>${texto(resultado.mensaje)}`);
@@ -366,5 +394,7 @@
     listaEpp.innerHTML = detalles.map((d) => filaEpp(d.epp, d.requerido, d.confianza, d.umbral, d.detectado)).join("");
   }
 
+  // Al salir de la página (o cambiar de módulo) la cámara se apaga.
   window.addEventListener("beforeunload", detener);
+  window.addEventListener("pagehide", detener);
 })();
