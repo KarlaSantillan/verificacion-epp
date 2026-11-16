@@ -28,7 +28,7 @@
   const barraProgreso = $("barraProgreso");
   const resultadoFinal = $("resultadoFinal");
 
-  const ANCHO_ENVIO = 640; // el modelo trabaja a 640 px: enviar más grande solo hace más lento el envío
+  const ANCHO_ENVIO = 1280; //se envía a 1280 px para no perder detalle en objetos pequeños (gafas).
   const SIN_DETECCION_MS = 1500; // tiempo sin detecciones antes de avisar (HU06-CA03)
   const VENTANA_MS = 1000; // cada EPP usa su mejor confianza del último segundo
   const captura = document.createElement("canvas");
