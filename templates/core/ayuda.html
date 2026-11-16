@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block titulo %}Ayuda{% endblock %}
+
+{% block estilos %}
+<style>
+  .ayuda-indice a { color: var(--epp-primary); text-decoration: none; border: 1px solid var(--epp-neutral); border-radius: 999px; padding: .35rem .85rem; font-size: .875rem; font-weight: 600; background: #fff; }
+  .ayuda-indice a:hover { background: var(--epp-accent-soft); }
+  .ayuda-seccion { scroll-margin-top: 80px; }
+  .paso-ayuda { display: flex; gap: .75rem; align-items: flex-start; height: 100%; }
+  .paso-ayuda .num { flex-shrink: 0; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--epp-primary); color: #fff; font-weight: 700; font-size: .85rem; }
+  .ayuda-lista { padding-left: 1.1rem; margin-bottom: 0; }
+  .ayuda-lista li + li { margin-top: .35rem; }
+  .estado { display: inline-flex; align-items: center; gap: .3rem; border-radius: 999px; padding: .15rem .6rem; font-size: .8rem; font-weight: 600; white-space: nowrap; }
+  .estado.ok { background: #f0fdf4; color: var(--epp-ok); border: 1px solid rgba(21, 128, 61, .3); }
+  .estado.mal { background: var(--epp-bad-soft); color: var(--epp-bad); border: 1px solid rgba(185, 28, 28, .25); }
+  .estado.alerta { background: var(--epp-warn-soft); color: var(--epp-warn); border: 1px solid rgba(146, 64, 14, .25); }
+  .estado.info { background: var(--epp-soft); color: var(--epp-primary); border: 1px solid var(--epp-neutral); }
+  .tabla-estados td { vertical-align: middle; padding: .6rem .5rem; }
+  .accordion-button { font-weight: 600; color: var(--epp-ink); }
+  .accordion-button:not(.collapsed) { background: var(--epp-accent-soft); color: var(--epp-ink); box-shadow: none; }
+  .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(251, 126, 0, .25); }
+  .accordion-item { border-color: var(--epp-neutral); }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="mb-3">
+  <h1 class="fs-3 fw-semibold text-heading mb-1">Ayuda</h1>
+  <p class="text-muted-epp mb-0">Guía de uso del sistema de verificación de EPP para docentes, encargados y administradores.</p>
+</div>
+
+<nav class="ayuda-indice d-flex flex-wrap gap-2 mb-4" aria-label="Secciones de la ayuda">
+  <a href="#guia"><i class="bi bi-signpost-2 me-1"></i>Guía rápida</a>
+  <a href="#recomendaciones"><i class="bi bi-lightbulb me-1"></i>Recomendaciones</a>
+  <a href="#preguntas"><i class="bi bi-question-circle me-1"></i>Preguntas frecuentes</a>
+  <a href="#estados"><i class="bi bi-tags me-1"></i>Estados</a>
+  {% if es_administrador %}<a href="#administracion"><i class="bi bi-shield-lock me-1"></i>Administración</a>{% endif %}
+</nav>
+
+<!-- 1. Guía rápida -->
+<section id="guia" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3">Guía rápida de verificación</h2>
+  <div class="row g-3">
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">1</span><div>
+        <div class="fw-semibold">Prepare la sesión</div>
+        <div class="small text-muted-epp">En <em>Verificación en vivo</em>, elija el laboratorio y, si lo desea, escriba la materia y la práctica. Se mantienen para toda la clase.</div>
+      </div></div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">2</span><div>
+        <div class="fw-semibold">Identifique al estudiante</div>
+        <div class="small text-muted-epp">Pulse «Iniciar cámara» y acerque el QR del carné a unos 20 cm. Si no se lee, escriba el código impreso en el carné.</div>
+      </div></div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">3</span><div>
+        <div class="fw-semibold">Verifique los EPP</div>
+        <div class="small text-muted-epp">Pulse «Continuar con la verificación de EPP». El estudiante se ubica como indica la guía en pantalla: de frente y con las manos a la altura de los hombros.</div>
+      </div></div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">4</span><div>
+        <div class="fw-semibold">Espere el resultado</div>
+        <div class="small text-muted-epp">Cuando la detección se mantiene estable aparece el resultado. «Cumple» se registra automáticamente.</div>
+      </div></div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">5</span><div>
+        <div class="fw-semibold">Si no cumple</div>
+        <div class="small text-muted-epp">El sistema indica qué EPP faltan. El estudiante se los coloca y usted pulsa «Verificar de nuevo», o registra el intento no conforme.</div>
+      </div></div></div>
+    </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="tarjeta p-3 h-100"><div class="paso-ayuda"><span class="num">6</span><div>
+        <div class="fw-semibold">Continúe con el siguiente</div>
+        <div class="small text-muted-epp">Pulse «Siguiente estudiante» para volver a la lectura del QR. Al terminar la clase, use «Nueva práctica».</div>
+      </div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. Recomendaciones -->
+<section id="recomendaciones" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3">Recomendaciones de uso</h2>
+  <div class="row g-3">
+    <div class="col-md-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-person-bounding-box"></i></span><span class="fw-semibold">Para una buena detección</span></div>
+        <ul class="ayuda-lista small">
+          <li>El estudiante debe estar a 1–1,5 m de la cámara, de la cintura hacia arriba.</li>
+          <li>Procure luz de frente; evite ventanas o lámparas detrás del estudiante.</li>
+          <li>Un fondo despejado reduce las detecciones equivocadas.</li>
+          <li>Pida al estudiante que se mantenga quieto hasta que se complete la barra.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-laptop"></i></span><span class="fw-semibold">Equipo y navegador</span></div>
+        <ul class="ayuda-lista small">
+          <li>Use Google Chrome o Microsoft Edge actualizados.</li>
+          <li>La primera vez, permita el acceso a la cámara cuando el navegador lo pregunte.</li>
+          <li>Con «Detener cámara» puede pausar la detección sin salir de la pantalla.</li>
+          <li>Las imágenes de la cámara no se guardan: solo se registra el resultado.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Preguntas frecuentes -->
+<section id="preguntas" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3">Preguntas frecuentes</h2>
+  <div class="accordion" id="faq">
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1" aria-expanded="false" aria-controls="faq1">La cámara no lee el código QR, ¿qué hago?</button></h3>
+      <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        Acerque o aleje el carné hasta unos 20 cm y evite reflejos en la pantalla del celular. Si aun así no se lee, escriba el código impreso en el carné en el campo «¿La cámara no lee el QR?» y pulse «Identificar».
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2" aria-expanded="false" aria-controls="faq2">El sistema no detecta un EPP que el estudiante sí lleva puesto</button></h3>
+      <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        Revise la iluminación y la distancia, y pida al estudiante que muestre bien el EPP (por ejemplo, las manos con guantes hacia la cámara). Si el resultado final es incorrecto, puede corregirlo después desde <em>Registros</em>.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3" aria-expanded="false" aria-controls="faq3">¿Cómo corrijo un resultado equivocado?</button></h3>
+      <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        En <em>Registros</em>, busque la validación y pulse «Ver detalle». Allí puede cambiar el resultado e indicar el motivo. El resultado original del modelo se conserva y la corrección queda registrada en la auditoría.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4" aria-expanded="false" aria-controls="faq4">¿Cómo empiezo otra clase o práctica?</button></h3>
+      <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        En <em>Verificación en vivo</em>, pulse «Nueva práctica». Se vacían la materia y la práctica para que escriba las de la nueva clase. Ambos campos son opcionales.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5" aria-expanded="false" aria-controls="faq5">¿Cómo exporto los registros?</button></h3>
+      <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        En <em>Registros</em> o en <em>Incidencias</em>, aplique los filtros que necesite y pulse «Exportar CSV». El archivo contiene solo los registros filtrados y se abre en Excel.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6" aria-expanded="false" aria-controls="faq6">El carné aparece como pendiente, inactivo o vencido</button></h3>
+      <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        Un carné nuevo queda <strong>pendiente</strong> hasta que se revise en <em>Carnés pendientes</em>. Si está <strong>inactivo</strong> o <strong>vencido</strong>, el estudiante debe actualizarlo en el SGA; mientras tanto no puede continuar con la verificación.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq7" aria-expanded="false" aria-controls="faq7">¿Qué significa la campana de la barra superior?</button></h3>
+      <div id="faq7" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body small">
+        Indica cuántos estudiantes requieren un llamado de atención por acumular incidencias en el periodo. La lista completa está en <em>Incidencias</em>, pestaña «Estudiantes reincidentes».
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Estados -->
+<section id="estados" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3">Significado de los estados</h2>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="fw-semibold mb-2">Resultado de la verificación</div>
+        <table class="table table-sm tabla-estados small mb-0">
+          <tbody>
+            <tr><td><span class="estado ok"><i class="bi bi-check-circle-fill"></i>Cumple</span></td><td>Se detectaron todos los EPP obligatorios del laboratorio.</td></tr>
+            <tr><td><span class="estado mal"><i class="bi bi-exclamation-triangle"></i>No cumple</span></td><td>Faltó al menos un EPP obligatorio. Cuenta como incidencia.</td></tr>
+            <tr><td><span class="estado info"><i class="bi bi-pencil-square"></i>Corregida</span></td><td>El docente cambió el resultado del modelo e indicó el motivo.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="fw-semibold mb-2">Seguimiento del estudiante</div>
+        <table class="table table-sm tabla-estados small mb-0">
+          <tbody>
+            <tr><td><span class="estado alerta"><i class="bi bi-eye"></i>En observación</span></td><td>Le falta una incidencia para llegar al límite del periodo.</td></tr>
+            <tr><td><span class="estado mal"><i class="bi bi-exclamation-circle"></i>Requiere llamado de atención</span></td><td>Alcanzó el límite de incidencias. El docente registra el llamado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-12">
+      <div class="tarjeta p-3">
+        <div class="fw-semibold mb-2">Estado del carné</div>
+        <table class="table table-sm tabla-estados small mb-0">
+          <tbody>
+            <tr><td style="width: 1%"><span class="estado ok">Registrado</span></td><td>Carné validado en el SGA y registrado en el sistema. Puede continuar.</td></tr>
+            <tr><td><span class="estado alerta">Pendiente</span></td><td>Carné nuevo que espera la revisión de un docente o administrador.</td></tr>
+            <tr><td><span class="estado mal">Inactivo o vencido</span></td><td>El carné no está vigente. El estudiante debe regularizarlo en el SGA.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if es_administrador %}
+<!-- 5. Solo administradores -->
+<section id="administracion" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3"><i class="bi bi-shield-lock me-1"></i>Administración</h2>
+  <div class="accordion" id="faqAdmin">
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adm1" aria-expanded="false" aria-controls="adm1">Configurar los EPP de un laboratorio</button></h3>
+      <div id="adm1" class="accordion-collapse collapse" data-bs-parent="#faqAdmin"><div class="accordion-body small">
+        En <em>Laboratorios</em>, abra el laboratorio y marque qué EPP del catálogo son obligatorios. Para cada uno defina la <strong>confianza mínima</strong> (entre 0 y 1; por defecto 0,80). En el laboratorio se define también el <strong>tiempo de estabilización</strong>, en segundos. Los cambios se aplican solo a las verificaciones siguientes.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adm2" aria-expanded="false" aria-controls="adm2">¿Qué confianza mínima conviene usar?</button></h3>
+      <div id="adm2" class="accordion-collapse collapse" data-bs-parent="#faqAdmin"><div class="accordion-body small">
+        Un valor bajo acepta detecciones dudosas; uno muy alto puede pedir un EPP que el estudiante sí lleva. Se recomienda entre 0,60 y 0,85, ajustado según las pruebas en el propio laboratorio.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adm3" aria-expanded="false" aria-controls="adm3">Cambiar el modelo de visión activo</button></h3>
+      <div id="adm3" class="accordion-collapse collapse" data-bs-parent="#faqAdmin"><div class="accordion-body small">
+        En <em>Modelo de visión</em>, registre la nueva versión con sus métricas y márquela como activa. Solo puede haber un modelo activo; el archivo del modelo debe estar en la carpeta de modelos del servidor.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adm4" aria-expanded="false" aria-controls="adm4">Umbral de incidencias y periodos académicos</button></h3>
+      <div id="adm4" class="accordion-collapse collapse" data-bs-parent="#faqAdmin"><div class="accordion-body small">
+        En <em>Parámetros generales</em> se define cuántas incidencias por periodo generan un llamado de atención (entre 1 y 20). Las incidencias se cuentan dentro del periodo vigente, que se configura en <em>Periodos académicos</em>.
+      </div></div>
+    </div>
+    <div class="accordion-item">
+      <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#adm5" aria-expanded="false" aria-controls="adm5">Cuentas de docentes y encargados</button></h3>
+      <div id="adm5" class="accordion-collapse collapse" data-bs-parent="#faqAdmin"><div class="accordion-body small">
+        En <em>Usuarios y roles</em> se crean las cuentas con el correo institucional y se asigna el rol. Para quitar el acceso, desactive la cuenta en lugar de eliminarla, así se conserva su historial.
+      </div></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<div class="aviso aviso-info d-flex gap-2 align-items-start">
+  <i class="bi bi-info-circle mt-1"></i>
+  <div>¿Problemas con su cuenta o con el sistema? Comuníquese con el administrador del sistema.</div>
+</div>
+{% endblock %}
