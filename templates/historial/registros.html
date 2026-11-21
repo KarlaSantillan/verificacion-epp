@@ -67,17 +67,24 @@
           <label class="form-label small mb-1" for="practica">Práctica</label>
           <input id="practica" name="practica" value="{{ filtros.practica }}" class="form-control" list="listaPracticas" placeholder="Todas">
         </div>
+        <div class="col-6 col-lg-3">
+          <label class="form-label small mb-1" for="mios">Verificaciones</label>
+          <select id="mios" name="mios" class="form-select">
+            <option value="1"{% if filtros.mios == "1" %} selected{% endif %}>Solo las mías</option>
+            <option value="0"{% if filtros.mios == "0" %} selected{% endif %}>De todos los docentes</option>
+          </select>
+        </div>
         <datalist id="listaMaterias">{% for m in materias %}<option value="{{ m }}">{% endfor %}</datalist>
         <datalist id="listaPracticas">{% for p in practicas %}<option value="{{ p }}">{% endfor %}</datalist>
         {% endif %}
   </div>
-  <div class="small text-muted-epp mt-2">Fechas en hora de Ecuador (America/Guayaquil).</div>
+  <div class="small text-muted-epp mt-2">Fechas en hora de Ecuador (America/Guayaquil).{% if pestana != "reincidentes" and filtros.mios == "1" %} Se muestran solo las verificaciones que usted supervisó.{% endif %}</div>
 </form>
 
 {% if modo == "registros" %}
 <nav class="chips" aria-label="Filtrar por resultado">
   {% for valor, texto in estados %}
-  <a href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}{% if filtros.laboratorio %}laboratorio={{ filtros.laboratorio }}&{% endif %}{% if filtros.periodo %}periodo={{ filtros.periodo }}&{% endif %}{% if filtros.desde %}desde={{ filtros.desde }}&{% endif %}{% if filtros.hasta %}hasta={{ filtros.hasta }}&{% endif %}{% if filtros.materia %}materia={{ filtros.materia|urlencode }}&{% endif %}{% if filtros.practica %}practica={{ filtros.practica|urlencode }}&{% endif %}estado={{ valor }}"
+  <a href="?{% if filtros.q %}q={{ filtros.q|urlencode }}&{% endif %}{% if filtros.laboratorio %}laboratorio={{ filtros.laboratorio }}&{% endif %}{% if filtros.periodo %}periodo={{ filtros.periodo }}&{% endif %}{% if filtros.desde %}desde={{ filtros.desde }}&{% endif %}{% if filtros.hasta %}hasta={{ filtros.hasta }}&{% endif %}{% if filtros.materia %}materia={{ filtros.materia|urlencode }}&{% endif %}{% if filtros.practica %}practica={{ filtros.practica|urlencode }}&{% endif %}mios={{ filtros.mios }}&estado={{ valor }}"
      class="{% if filtros.estado == valor %}activo{% endif %}" aria-pressed="{% if filtros.estado == valor %}true{% else %}false{% endif %}">{% if filtros.estado == valor %}<i class="bi bi-check2"></i> {% endif %}{{ texto }}</a>
   {% endfor %}
 </nav>

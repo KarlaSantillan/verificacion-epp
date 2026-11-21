@@ -11,11 +11,18 @@ CAMPOS = ("q", "laboratorio", "periodo", "desde", "hasta", "estado", "materia", 
 ESTADOS = [("", "Todos"), ("conforme", "Cumple"), ("no_conforme", "No cumple"), ("corregidas", "Corregidas")]
 
 
-def leer_filtros(parametros):
-    return {campo: (parametros.get(campo) or "").strip() for campo in CAMPOS}
+def leer_filtros(parametros, usuario=None):
+    filtros = {campo: (parametros.get(campo) or "").strip() for campo in CAMPOS}
+    # "Solo mis verificaciones": activado por defecto para el docente y desactivado para el administrador.
+    # La reincidencia y la campana siempre cuentan las validaciones de todos los docentes.
+    mios = (parametros.get("mios") or "").strip()
+    if mios not in ("0", "1"):
+        mios = "1" if usuario is not None and not getattr(usuario, "es_administrador", False) else "0"
+    filtros["mios"] = mios
+    return filtros
 
 
-def filtrar_validaciones(filtros, solo_incidencias=False):
+def filtrar_validaciones(filtros, solo_incidencias=False, usuario=None):
     """Devuelve las validaciones que cumplen TODOS los filtros (CA01)."""
     detalles = ValidacionDetalle.objects.select_related("epp").order_by("epp__nombre")
     validaciones = (
@@ -30,6 +37,8 @@ def filtrar_validaciones(filtros, solo_incidencias=False):
     elif filtros["estado"] in (Validacion.CONFORME, Validacion.NO_CONFORME):
         validaciones = validaciones.filter(resultado_final=filtros["estado"])
 
+    if filtros.get("mios") == "1" and usuario is not None:
+        validaciones = validaciones.filter(usuario_supervisor=usuario)
     if filtros["laboratorio"].isdigit():
         validaciones = validaciones.filter(laboratorio_id=int(filtros["laboratorio"]))
     if filtros["periodo"].isdigit():

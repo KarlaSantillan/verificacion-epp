@@ -27,8 +27,8 @@ from .filtros import faltantes, filtrar_validaciones, leer_filtros, opciones
 
 
 def _lista(request, modo):
-    filtros = leer_filtros(request.GET)
-    validaciones = filtrar_validaciones(filtros, solo_incidencias=(modo == "incidencias"))
+    filtros = leer_filtros(request.GET, request.user)
+    validaciones = filtrar_validaciones(filtros, solo_incidencias=(modo == "incidencias"), usuario=request.user)
     pagina = Paginator(validaciones, 20).get_page(request.GET.get("pagina"))
     for validacion in pagina:
         validacion.faltantes = faltantes(validacion)
@@ -36,7 +36,7 @@ def _lista(request, modo):
         "modo": modo,
         "pagina": pagina,
         "filtros": filtros,
-        "hay_filtros": any(filtros.values()),
+        "hay_filtros": any(valor for campo, valor in filtros.items() if campo != "mios"),
         "parametros_url": urlencode({k: v for k, v in filtros.items() if v}),
         **opciones(),
     }

@@ -7,4 +7,9 @@ def notificaciones(request):
     if not usuario or not usuario.is_authenticated:
         return {}
     periodo, lista = pendientes_de_llamado()
-    return {"notificaciones_llamado": lista[:5], "total_notificaciones": len(lista), "periodo_notificaciones": periodo}
+    return {
+        "notificaciones_llamado": lista[:5],
+        "total_notificaciones": len(lista),
+        "periodo_notificaciones": periodo,
+        "ids_notificaciones": ",".join(str(r.estudiante.pk) for r in lista),  # para que campana.js detecte los nuevos
+    }

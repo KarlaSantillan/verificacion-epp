@@ -52,6 +52,12 @@
     }
   });
 
+  // Acceso rápido al detalle (tutoría): se abre en otra pestaña para no interrumpir la verificación.
+  function enlaceDetalle(id) {
+    const url = window.EPP.urlDetalle.replace(/0\/?$/, `${Number(id)}/`);
+    return `${url}?volver=${encodeURIComponent("/historial/registros/")}`;
+  }
+
   function limpiar() {
     pendiente = null;
     panel.innerHTML = "";
@@ -73,8 +79,13 @@
       if (!datos.ok) throw new Error(datos.mensaje || "No se pudo guardar.");
       const conforme = datos.resultado === "conforme";
       panel.innerHTML = `<div class="aviso ${conforme ? "aviso-ok" : "aviso-warn"}">
-        <i class="bi ${conforme ? "bi-check2-circle" : "bi-journal-x"} me-1"></i>${texto(datos.mensaje)} <span class="small">(registro #${datos.id})</span></div>`;
+        <i class="bi ${conforme ? "bi-check2-circle" : "bi-journal-x"} me-1"></i>${texto(datos.mensaje)} <span class="small">(registro #${datos.id})</span>
+        </div>
+        <a href="${enlaceDetalle(datos.id)}" target="_blank" rel="noopener" class="btn btn-epp-outline btn-sm w-100 mt-2">
+          <i class="bi bi-pencil-square me-1"></i>Ver o corregir este registro</a>`;
       pendiente = null;
+      // La campana se actualiza al instante (por si este registro completa el umbral de incidencias).
+      document.dispatchEvent(new CustomEvent("epp:validacion-registrada", { detail: datos }));
     } catch (e) {
       // CA04: la evaluación se conserva; el reintento usa la misma clave.
       panel.innerHTML = `<div class="aviso aviso-error">

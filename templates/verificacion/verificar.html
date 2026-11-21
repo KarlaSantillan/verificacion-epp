@@ -51,6 +51,11 @@
       <button id="btnNuevaPractica" type="button" class="btn btn-epp-outline" title="Vaciar materia y práctica para empezar otra clase">
         <i class="bi bi-plus-circle me-1"></i>Nueva práctica
       </button>
+      {# Acceso rápido (tutoría): abre en otra pestaña los registros de hoy del docente, sin detener la verificación. #}
+      <a href="{% url 'historial:registros' %}?desde={% now 'Y-m-d' %}&amp;hasta={% now 'Y-m-d' %}&amp;mios=1" target="_blank" rel="noopener"
+         class="btn btn-epp-outline" title="Ver y corregir los registros de hoy (se abre en otra pestaña)">
+        <i class="bi bi-journal-check me-1"></i>Mis registros de hoy
+      </a>
       <span id="estadoSesion" class="small text-muted-epp pb-2" aria-live="polite"></span>
       <datalist id="sugerenciasMateria"></datalist>
       <datalist id="sugerenciasPractica"></datalist>
@@ -158,13 +163,14 @@
     urlEvaluar: "{% url 'verificacion:evaluar' %}",
     urlRegistrar: "{% url 'verificacion:registrar' %}",
     urlCorreo: "{% url 'verificacion:correo_estudiante' %}",
+    urlDetalle: "{% url 'historial:detalle' 0 %}",  // se reemplaza el 0 por el número del registro
     csrf: "{{ csrf_token }}",
   };
 </script>
 <script src="{% static 'js/lector_qr.js' %}?v=3"></script>
 <script src="{% static 'js/deteccion_epp.js' %}?v=6"></script>
 <script src="{% static 'js/guia_posicion.js' %}?v=1"></script>
-<script src="{% static 'js/registro_validacion.js' %}?v=1"></script>
+<script src="{% static 'js/registro_validacion.js' %}?v=3"></script>
 <script src="{% static 'js/aviso_reincidente.js' %}?v=1"></script>
 <script src="{% static 'js/correo_estudiante.js' %}?v=1"></script>
 <script src="{% static 'js/sesion_practica.js' %}?v=1"></script>

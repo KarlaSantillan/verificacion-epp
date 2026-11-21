@@ -4,24 +4,17 @@
   .campana:hover, .campana:focus-visible { background: var(--epp-soft); }
   .campana .contador { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: var(--epp-bad); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; box-shadow: 0 0 0 2px #fff; }
   .menu-notificaciones { width: 360px; max-width: calc(100vw - 32px); }
+  .campana.sacudir i { display: inline-block; animation: sacudir-campana .8s ease-in-out 2; transform-origin: 50% 0; }
+  @keyframes sacudir-campana { 0%,100% { transform: rotate(0); } 20% { transform: rotate(16deg); } 40% { transform: rotate(-14deg); } 60% { transform: rotate(10deg); } 80% { transform: rotate(-6deg); } }
+  @media (prefers-reduced-motion: reduce) { .campana.sacudir i { animation: none; } }
+  .lista-campana { max-height: 320px; overflow-y: auto; }
 </style>
-<div class="dropdown">
-  <button class="campana" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones, {{ total_notificaciones|default:0 }} pendientes">
+<div class="dropdown" id="campana" data-url="{% url 'seguimiento:notificaciones' %}"
+     data-ids="{{ ids_notificaciones }}">
+  <button class="campana" id="campanaBoton" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones, {{ total_notificaciones|default:0 }} pendientes">
     <i class="bi bi-bell"></i>{% if total_notificaciones %}<span class="contador">{{ total_notificaciones }}</span>{% endif %}
   </button>
-  <div class="dropdown-menu dropdown-menu-end menu-notificaciones p-3 shadow">
-    <div class="fw-semibold mb-2">Notificaciones</div>
-    {% if total_notificaciones %}
-      <p class="small text-muted-epp mb-2">{{ total_notificaciones }} estudiante{{ total_notificaciones|pluralize }} requiere{{ total_notificaciones|pluralize:"n" }} llamado de atención{% if periodo_notificaciones %} ({{ periodo_notificaciones.nombre }}){% endif %}.</p>
-      {% for r in notificaciones_llamado %}
-      <a href="{% url 'historial:llamado' r.estudiante.pk %}?periodo={{ periodo_notificaciones.pk }}" class="d-block p-2 rounded-3 text-decoration-none border mb-2 small">
-        <div class="fw-semibold text-heading">{{ r.estudiante }}</div>
-        <div class="text-muted-epp">{{ r.desde_ultimo_llamado }} incidencias · última {{ r.ultima_incidencia|date:"d/m H:i" }}</div>
-      </a>
-      {% endfor %}
-      <a href="{% url 'historial:incidencias' %}?tab=reincidentes" class="btn btn-sm btn-epp w-100">Ver estudiantes reincidentes</a>
-    {% else %}
-      <p class="small text-muted-epp mb-0">No hay estudiantes que requieran llamado de atención.</p>
-    {% endif %}
+  <div class="dropdown-menu dropdown-menu-end menu-notificaciones p-3 shadow" id="campanaMenu">
+    {% include "seguimiento/_campana_contenido.html" %}
   </div>
 </div>

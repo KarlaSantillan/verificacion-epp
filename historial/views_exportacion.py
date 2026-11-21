@@ -10,7 +10,7 @@ from .filtros import filtrar_validaciones, leer_filtros
 @require_GET
 def registros_csv(request):
     """Registros con los filtros actuales (laboratorio, periodo, fechas, estudiante y resultado)."""
-    validaciones = filtrar_validaciones(leer_filtros(request.GET))
+    validaciones = filtrar_validaciones(leer_filtros(request.GET, request.user), usuario=request.user)
     return respuesta_csv(validaciones, "registros")
 
 
@@ -18,5 +18,5 @@ def registros_csv(request):
 @require_GET
 def incidencias_csv(request):
     """Solo intentos "No cumple" (pestaña Intentos no conformes), con los filtros actuales."""
-    validaciones = filtrar_validaciones(leer_filtros(request.GET), solo_incidencias=True)
+    validaciones = filtrar_validaciones(leer_filtros(request.GET, request.user), solo_incidencias=True, usuario=request.user)
     return respuesta_csv(validaciones, "incidencias")
