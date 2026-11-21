@@ -65,14 +65,85 @@
     }
   }
 
-  // Botón "Nueva práctica": vacía los dos campos para escribir los de la nueva clase.
+  // Vacía los dos campos para escribir los de la nueva clase y reinicia la hora de inicio de la práctica.
+  async function empezarNueva() {
+    campos.materia.value = "";
+    campos.practica.value = "";
+    const datos = { ...valores(), nueva: true };
+    try {
+      await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": window.EPP.csrf },
+        body: JSON.stringify(datos),
+      });
+      ultimo = JSON.stringify(valores());
+    } catch (e) {
+      estado.textContent = "No se pudo guardar";
+    }
+    campos.materia.focus();
+  }
+
+  // Botón "Nueva práctica": primero muestra el resumen de la clase que termina (si hubo verificaciones).
   const btnNueva = document.getElementById("btnNuevaPractica");
+  const modal = document.getElementById("modalResumen");
+  const cuerpo = document.getElementById("cuerpoResumen");
+  const estadoResumen = document.getElementById("estadoResumen");
+  const ventana = modal && window.bootstrap ? new bootstrap.Modal(modal) : null;
+
   if (btnNueva) {
-    btnNueva.addEventListener("click", () => {
-      campos.materia.value = "";
-      campos.practica.value = "";
-      guardar();
-      campos.materia.focus();
+    btnNueva.addEventListener("click", async () => {
+      await guardar(); // por si la materia o la práctica se acaban de escribir
+      if (!ventana) return empezarNueva();
+      btnNueva.disabled = true;
+      try {
+        const respuesta = await fetch(caja.dataset.urlResumen, { headers: { Accept: "application/json" }, cache: "no-store" });
+        const datos = await respuesta.json();
+        // Siempre se pide confirmación: así un clic por error no borra la materia y la práctica.
+        cuerpo.innerHTML = datos.total
+          ? `<p class="small mb-3">Este es el resumen de la práctica actual. Al confirmar se vacían la materia y la práctica para empezar otra clase.</p>${datos.html}`
+          : '<p class="mb-0">Todavía no hay verificaciones en esta práctica. ¿Desea vaciar la materia y la práctica para empezar otra clase?</p>';
+        document.getElementById("btnImprimirResumen").classList.toggle("d-none", !datos.total);
+        document.getElementById("btnCorreoResumen").classList.toggle("d-none", !datos.total);
+        estadoResumen.textContent = "";
+        ventana.show();
+      } catch (e) {
+        cuerpo.innerHTML = '<p class="mb-0">No se pudo cargar el resumen. ¿Desea empezar una nueva práctica de todas formas?</p>';
+        document.getElementById("btnImprimirResumen").classList.add("d-none");
+        document.getElementById("btnCorreoResumen").classList.add("d-none");
+        ventana.show();
+      } finally {
+        btnNueva.disabled = false;
+      }
+    });
+  }
+
+  if (modal) {
+    document.getElementById("btnEmpezarPractica").addEventListener("click", () => {
+      ventana.hide();
+      empezarNueva();
+    });
+
+    // Imprimir: abre el documento con formato de guía de práctica y lanza la impresión (o "Guardar como PDF").
+    document.getElementById("btnImprimirResumen").addEventListener("click", () => {
+      window.open(`${caja.dataset.urlImprimir}?imprimir=1`, "_blank");
+    });
+
+    const btnCorreo = document.getElementById("btnCorreoResumen");
+    btnCorreo.addEventListener("click", async () => {
+      btnCorreo.disabled = true;
+      estadoResumen.className = "small me-auto text-muted-epp";
+      estadoResumen.textContent = "Enviando…";
+      try {
+        const respuesta = await fetch(caja.dataset.urlEnviar, { method: "POST", headers: { "X-CSRFToken": window.EPP.csrf } });
+        const datos = await respuesta.json();
+        estadoResumen.className = `small me-auto ${datos.ok ? "text-success" : "text-danger"}`;
+        estadoResumen.textContent = datos.mensaje;
+      } catch (e) {
+        estadoResumen.className = "small me-auto text-danger";
+        estadoResumen.textContent = "No se pudo enviar el correo.";
+      } finally {
+        btnCorreo.disabled = false;
+      }
     });
   }
 

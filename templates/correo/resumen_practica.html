@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Resumen de práctica de laboratorio</title></head>
+<body style="margin:0; padding:0; background:#eef1f5;">
+<!-- Mismo estilo que el documento para imprimir (formato de guía de práctica), con tablas y estilos en línea para Gmail y Outlook. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5; padding:24px 12px;">
+  <tr><td align="center">
+    <table role="presentation" width="640" cellpadding="0" cellspacing="0" style="width:100%; max-width:640px; background:#ffffff; border:1px solid #c9ced6; font-family:Arial, Helvetica, sans-serif; color:#111; font-size:13px; line-height:19px;">
+      <tr><td style="padding:22px 26px 0 26px;">
+        <div style="width:70px; height:6px; background:#f6a61e; margin-bottom:6px; font-size:0; line-height:0;">&nbsp;</div>
+        <div style="font-size:18px; font-weight:700; color:#1c3247;">UNIVERSIDAD ESTATAL DE MILAGRO</div>
+        <div style="font-size:12px; color:#444; padding-bottom:8px; border-bottom:3px solid #1c3247;">Facultad de Ciencias e Ingenierías · Laboratorios de Biotecnología · Sistema de Verificación de EPP</div>
+      </td></tr>
+
+      <tr><td style="padding:14px 26px 0 26px;">
+        <div style="text-align:center; font-weight:700; font-size:14px; border:1px solid #999; padding:7px;">RESUMEN DE PRÁCTICA DE LABORATORIO – VERIFICACIÓN DE EPP</div>
+        <p style="margin:12px 0 0 0;">Estimado/a <strong>{{ r.docente }}</strong>, este es el resumen de las verificaciones de EPP de la práctica que acaba de finalizar.</p>
+      </td></tr>
+
+      <!-- Datos generales -->
+      <tr><td style="padding:14px 26px 0 26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr><td colspan="2" style="background:#d9d9d9; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">DATOS GENERALES</td></tr>
+          <tr><td style="width:34%; background:#f2f2f2; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">MATERIA</td><td style="border:1px solid #999; padding:6px 8px;">{{ r.materia|default:"—" }}</td></tr>
+          <tr><td style="background:#f2f2f2; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">PRÁCTICA</td><td style="border:1px solid #999; padding:6px 8px;">{{ r.practica|default:"—" }}</td></tr>
+          <tr><td style="background:#f2f2f2; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">LABORATORIO</td><td style="border:1px solid #999; padding:6px 8px;">{{ r.laboratorios|join:", "|default:"—" }}</td></tr>
+          <tr><td style="background:#f2f2f2; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">DOCENTE DE LA PRÁCTICA</td><td style="border:1px solid #999; padding:6px 8px;">{{ r.docente }}</td></tr>
+          {% if r.inicio %}<tr><td style="background:#f2f2f2; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">FECHA Y HORARIO</td><td style="border:1px solid #999; padding:6px 8px;">{{ r.inicio|date:"d/m/Y" }} · {{ r.inicio|date:"H:i" }} – {{ r.fin|date:"H:i" }}</td></tr>{% endif %}
+        </table>
+      </td></tr>
+
+      <!-- Resultados -->
+      <tr><td style="padding:14px 26px 0 26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; text-align:center;">
+          <tr><td colspan="4" style="background:#d9d9d9; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px; text-align:left;">RESULTADOS DE LA VERIFICACIÓN</td></tr>
+          <tr>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">VERIFICADOS</td>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">CUMPLIERON</td>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">NO CUMPLIERON</td>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">CORRIGIERON</td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #999; padding:8px; font-size:20px; font-weight:700;">{{ r.total }}</td>
+            <td style="border:1px solid #999; padding:8px; font-size:20px; font-weight:700; color:#15803d;">{{ r.cumplieron }}<div style="font-size:11px; font-weight:400; color:#444;">{{ r.porcentaje }} %</div></td>
+            <td style="border:1px solid #999; padding:8px; font-size:20px; font-weight:700; color:#b42318;">{{ r.no_cumplieron|length }}</td>
+            <td style="border:1px solid #999; padding:8px; font-size:20px; font-weight:700;">{{ r.corrigieron }}</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- EPP faltantes -->
+      <tr><td style="padding:14px 26px 0 26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr><td colspan="2" style="background:#d9d9d9; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">EPP FALTANTES</td></tr>
+          {% for nombre, veces in r.epp_faltantes %}
+          <tr><td style="border:1px solid #999; padding:6px 8px;">{{ nombre }}</td><td style="width:30%; border:1px solid #999; padding:6px 8px; text-align:center;">{{ veces }} {% if veces == 1 %}vez{% else %}veces{% endif %}</td></tr>
+          {% empty %}
+          <tr><td colspan="2" style="border:1px solid #999; padding:6px 8px; text-align:center;">Ningún EPP faltante.</td></tr>
+          {% endfor %}
+        </table>
+      </td></tr>
+
+      <!-- Estudiantes que no cumplieron -->
+      <tr><td style="padding:14px 26px 0 26px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+          <tr><td colspan="3" style="background:#d9d9d9; border:1px solid #999; padding:6px 8px; font-weight:700; font-size:12px;">ESTUDIANTES QUE NO CUMPLIERON ({{ r.no_cumplieron|length }})</td></tr>
+          {% if r.no_cumplieron %}
+          <tr>
+            <td style="width:8%; background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px; text-align:center;">N.º</td>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">ESTUDIANTE</td>
+            <td style="background:#f2f2f2; border:1px solid #999; padding:6px; font-weight:700; font-size:11px;">EPP FALTANTES</td>
+          </tr>
+          {% for e in r.no_cumplieron|slice:":20" %}
+          <tr><td style="border:1px solid #999; padding:6px; text-align:center;">{{ forloop.counter }}</td><td style="border:1px solid #999; padding:6px 8px;">{{ e.nombre }}</td><td style="border:1px solid #999; padding:6px 8px;">{{ e.faltantes|join:", "|default:"—" }}</td></tr>
+          {% endfor %}
+          {% else %}
+          <tr><td colspan="3" style="border:1px solid #999; padding:6px 8px; text-align:center; color:#15803d;">Todos los estudiantes verificados cumplieron con sus EPP.</td></tr>
+          {% endif %}
+        </table>
+        {% if r.no_cumplieron|length > 20 %}<p style="font-size:12px; color:#444; margin:6px 0 0 0;">… y {{ r.no_cumplieron|length|add:-20 }} estudiantes más. Consulte la lista completa en el documento para imprimir o en Registros del sistema.</p>{% endif %}
+      </td></tr>
+
+      <tr><td style="padding:16px 26px 20px 26px; font-size:11px; color:#555;">
+        Cada estudiante se cuenta una vez, con el resultado de su última verificación ({{ r.intentos }} en total).
+      </td></tr>
+      <tr><td style="background:#f2f2f2; border-top:1px solid #c9ced6; padding:12px 26px; font-size:11px; color:#555;">
+        Mensaje generado automáticamente por el Sistema de Verificación de EPP. Por favor, no responda a este correo.
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

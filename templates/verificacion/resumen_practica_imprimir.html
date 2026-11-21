@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Resumen de práctica de laboratorio</title>
+<style>
+  /* Documento para imprimir o guardar como PDF, con el estilo de las guías de práctica institucionales. */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm 16mm;
+    @bottom-left { content: "Sistema de Verificación de EPP"; font: 8pt Arial, sans-serif; color: #555; }
+    @bottom-right { content: counter(page) " de " counter(pages); font: 8pt Arial, sans-serif; color: #555; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 9.5pt/1.35 Arial, Helvetica, sans-serif; color: #111; background: #fff; }
+  .hoja { max-width: 190mm; margin: 0 auto; padding: 8mm 0; }
+  .encabezado { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 3px solid #1c3247; padding-bottom: 6px; }
+  .encabezado .institucion { font-size: 14pt; font-weight: 700; color: #1c3247; letter-spacing: .3px; }
+  .encabezado .sub { font-size: 8.5pt; color: #444; }
+  .encabezado .franja { width: 70px; height: 6px; background: #f6a61e; margin-bottom: 4px; }
+  .titulo-doc { text-align: center; font-size: 12pt; font-weight: 700; margin: 12px 0 10px; border: 1px solid #999; padding: 6px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 10px; page-break-inside: auto; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid #999; padding: 5px 7px; vertical-align: top; text-align: left; }
+  .seccion th { background: #d9d9d9; text-transform: uppercase; font-size: 8.5pt; letter-spacing: .3px; }
+  .etiqueta { background: #f2f2f2; font-weight: 700; text-transform: uppercase; font-size: 8.5pt; width: 22%; }
+  .cabecera td, .cabecera th { background: #f2f2f2; font-weight: 700; text-align: center; font-size: 8.5pt; text-transform: uppercase; }
+  .centro { text-align: center; }
+  .num { font-size: 13pt; font-weight: 700; text-align: center; }
+  .ok { color: #15803d; } .mal { color: #b42318; }
+  .observaciones { height: 28mm; }
+  .firma { margin-top: 22mm; display: flex; justify-content: center; }
+  .firma div { width: 80mm; border-top: 1px solid #111; text-align: center; padding-top: 4px; font-size: 9pt; }
+  .pie { margin-top: 8mm; font-size: 7.5pt; color: #555; border-top: 1px solid #ccc; padding-top: 4px; display: flex; justify-content: space-between; }
+  .acciones { text-align: center; margin: 10px 0; }
+  .acciones button { font: 600 10pt Arial, sans-serif; padding: 8px 16px; border-radius: 8px; border: 1px solid #1c3247; background: #1c3247; color: #fff; cursor: pointer; }
+  @media print { .acciones { display: none; } .hoja { padding: 0; } .pie { display: none; } }
+</style>
+</head>
+<body>
+<div class="acciones"><button type="button" onclick="window.print()">Imprimir o guardar como PDF</button></div>
+<div class="hoja">
+  <div class="encabezado">
+    <div>
+      <div class="franja"></div>
+      <div class="institucion">UNIVERSIDAD ESTATAL DE MILAGRO</div>
+      <div class="sub">Facultad de Ciencias e Ingenierías · Laboratorios de Biotecnología</div>
+    </div>
+    <div class="sub" style="text-align:right">Sistema de Verificación de EPP<br>Emitido: {{ emitido|date:"d/m/Y H:i" }}</div>
+  </div>
+
+  <div class="titulo-doc">RESUMEN DE PRÁCTICA DE LABORATORIO – VERIFICACIÓN DE EPP</div>
+
+  <table>
+    <tr class="seccion"><th colspan="4">Datos generales</th></tr>
+    <tr><td class="etiqueta">Materia</td><td colspan="3">{{ r.materia|default:"—" }}</td></tr>
+    <tr><td class="etiqueta">Práctica</td><td colspan="3">{{ r.practica|default:"—" }}</td></tr>
+    <tr><td class="etiqueta">Laboratorio</td><td colspan="3">{{ r.laboratorios|join:", "|default:"—" }}</td></tr>
+    <tr>
+      <td class="etiqueta">Docente de la práctica</td><td>{{ r.docente }}</td>
+      <td class="etiqueta">Fecha</td><td>{% if r.inicio %}{{ r.inicio|date:"d/m/Y" }}{% else %}—{% endif %}</td>
+    </tr>
+    <tr>
+      <td class="etiqueta">Hora de inicio</td><td>{% if r.inicio %}{{ r.inicio|date:"H:i" }}{% else %}—{% endif %}</td>
+      <td class="etiqueta">Hora de fin</td><td>{% if r.fin %}{{ r.fin|date:"H:i" }}{% else %}—{% endif %}</td>
+    </tr>
+  </table>
+
+  <table>
+    <tr class="seccion"><th colspan="4">Resultados de la verificación</th></tr>
+    <tr class="cabecera"><td>Estudiantes verificados</td><td>Cumplieron</td><td>No cumplieron</td><td>Corrigieron en el momento</td></tr>
+    <tr>
+      <td class="num">{{ r.total }}</td>
+      <td class="num ok">{{ r.cumplieron }} <span style="font-size:9pt">({{ r.porcentaje }} %)</span></td>
+      <td class="num mal">{{ r.no_cumplieron|length }}</td>
+      <td class="num">{{ r.corrigieron }}</td>
+    </tr>
+    <tr><td colspan="4" style="font-size:8pt; color:#444">Cada estudiante se cuenta una vez, con el resultado de su última verificación ({{ r.intentos }} verificación{{ r.intentos|pluralize:"es" }} en total).</td></tr>
+  </table>
+
+  <table>
+    <tr class="seccion"><th colspan="2">EPP faltantes</th></tr>
+    <tr class="cabecera"><td>Equipo de protección personal</td><td style="width:30%">Número de veces</td></tr>
+    {% for nombre, veces in r.epp_faltantes %}
+    <tr><td>{{ nombre }}</td><td class="centro">{{ veces }}</td></tr>
+    {% empty %}
+    <tr><td colspan="2" class="centro">Ningún EPP faltante.</td></tr>
+    {% endfor %}
+  </table>
+
+  <table>
+    <tr class="seccion"><th colspan="3">Estudiantes que no cumplieron ({{ r.no_cumplieron|length }})</th></tr>
+    <tr class="cabecera"><td style="width:8%">N.º</td><td>Estudiante</td><td>EPP faltantes</td></tr>
+    {% for e in r.no_cumplieron %}
+    <tr><td class="centro">{{ forloop.counter }}</td><td>{{ e.nombre }}</td><td>{{ e.faltantes|join:", "|default:"—" }}</td></tr>
+    {% empty %}
+    <tr><td colspan="3" class="centro">Todos los estudiantes verificados cumplieron con sus EPP.</td></tr>
+    {% endfor %}
+  </table>
+
+  <table>
+    <tr class="seccion"><th>Observaciones</th></tr>
+    <tr><td class="observaciones"></td></tr>
+  </table>
+
+  <div class="firma"><div>{{ r.docente }}<br><span style="font-size:8pt; color:#444">Docente de la práctica</span></div></div>
+
+  <div class="pie"><span>Generado por el Sistema de Verificación de EPP</span><span>Emitido: {{ emitido|date:"d/m/Y H:i" }}</span></div>
+</div>
+{% if imprimir %}<script>window.addEventListener("load", () => setTimeout(() => window.print(), 300));</script>{% endif %}
+</body>
+</html>

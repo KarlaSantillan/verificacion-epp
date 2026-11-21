@@ -1,11 +1,12 @@
 from django.urls import path
 
-from . import views, views_exportacion, views_practica
+from . import views, views_exportacion, views_practica, views_practicas
 
 app_name = "historial"
 
 urlpatterns = [
     path("registros/", views.registros, name="registros"),
+    path("practicas/", views_practicas.practicas, name="practicas"),  # resúmenes de prácticas anteriores
     path("incidencias/", views.incidencias, name="incidencias"),
     path("registros/csv/", views_exportacion.registros_csv, name="registros_csv"),  # HU11
     path("incidencias/csv/", views_exportacion.incidencias_csv, name="incidencias_csv"),  # HU11

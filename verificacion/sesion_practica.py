@@ -12,6 +12,7 @@ import re
 
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 CLAVE_SESION = "sesion_practica"
@@ -59,5 +60,8 @@ def guardar(request):
         "materia": limpiar(datos.get("materia"), LARGO_MATERIA),
         "practica": limpiar(datos.get("practica"), LARGO_PRACTICA),
     }
-    request.session[CLAVE_SESION] = valores
+    # Hora de inicio de la práctica, para el resumen de la clase. Se reinicia con «Empezar nueva práctica».
+    previo = request.session.get(CLAVE_SESION) or {}
+    inicio = None if datos.get("nueva") else previo.get("inicio")
+    request.session[CLAVE_SESION] = {**valores, "inicio": inicio or timezone.now().isoformat()}
     return JsonResponse({"ok": True, **valores})

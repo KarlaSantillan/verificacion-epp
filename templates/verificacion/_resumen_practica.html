@@ -1,0 +1,40 @@
+{% comment %}Resumen de la clase que termina (se muestra al pulsar «Nueva práctica» y se usa para imprimir).{% endcomment %}
+<div class="resumen-practica">
+  <div class="d-flex flex-wrap gap-3 small text-muted-epp mb-3">
+    <span><i class="bi bi-book me-1"></i><strong class="text-heading">{{ r.materia|default:"Sin materia" }}</strong>{% if r.practica %} · {{ r.practica }}{% endif %}</span>
+    <span><i class="bi bi-building me-1"></i>{{ r.laboratorios|join:", "|default:"—" }}</span>
+    {% if r.inicio %}<span><i class="bi bi-clock me-1"></i>{{ r.inicio|date:"d/m/Y H:i" }} – {{ r.fin|date:"H:i" }}</span>{% endif %}
+    <span><i class="bi bi-person me-1"></i>{{ r.docente }}</span>
+  </div>
+
+  <div class="row g-2 mb-3 text-center">
+    <div class="col-6 col-md-3"><div class="border rounded-3 p-2"><div class="fs-3 fw-bold text-heading">{{ r.total }}</div><div class="small text-muted-epp">Verificados</div></div></div>
+    <div class="col-6 col-md-3"><div class="border rounded-3 p-2" style="background:#f0fdf4"><div class="fs-3 fw-bold" style="color:var(--epp-ok)">{{ r.cumplieron }}</div><div class="small text-muted-epp">Cumplieron ({{ r.porcentaje }} %)</div></div></div>
+    <div class="col-6 col-md-3"><div class="border rounded-3 p-2" style="background:var(--epp-bad-soft)"><div class="fs-3 fw-bold" style="color:var(--epp-bad)">{{ r.no_cumplieron|length }}</div><div class="small text-muted-epp">No cumplieron</div></div></div>
+    <div class="col-6 col-md-3"><div class="border rounded-3 p-2"><div class="fs-3 fw-bold text-heading">{{ r.corrigieron }}</div><div class="small text-muted-epp">Corrigieron en el momento</div></div></div>
+  </div>
+
+  <div class="small mb-3"><span class="fw-semibold">EPP que faltaron (veces):</span> {{ r.resumen_faltantes|default:"ninguno" }}</div>
+
+  {% if r.no_cumplieron %}
+  <div class="fw-semibold small mb-1">Estudiantes que no cumplieron ({{ r.no_cumplieron|length }})</div>
+  <ul class="list-unstyled small mb-0">
+    {% for e in r.no_cumplieron|slice:":5" %}
+    <li class="border rounded-3 px-2 py-1 mb-1"><span class="fw-semibold">{{ e.nombre }}</span> <span class="text-muted-epp">· falta {{ e.faltantes|join:", "|default:"—" }}</span></li>
+    {% endfor %}
+  </ul>
+  {% if r.no_cumplieron|length > 5 %}
+  <details class="small">
+    <summary class="text-primary" style="cursor:pointer">Ver los {{ r.no_cumplieron|length|add:-5 }} restantes</summary>
+    <ul class="list-unstyled mt-1 mb-0">
+      {% for e in r.no_cumplieron|slice:"5:" %}
+      <li class="border rounded-3 px-2 py-1 mb-1"><span class="fw-semibold">{{ e.nombre }}</span> <span class="text-muted-epp">· falta {{ e.faltantes|join:", "|default:"—" }}</span></li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+  {% else %}
+  <div class="aviso aviso-ok small mb-0"><i class="bi bi-check2-circle me-1"></i>Todos los estudiantes verificados cumplieron con sus EPP.</div>
+  {% endif %}
+  <p class="small text-muted-epp mt-3 mb-0">Cada estudiante se cuenta una vez, con el resultado de su última verificación ({{ r.intentos }} verificación{{ r.intentos|pluralize:"es" }} en total).</p>
+</div>

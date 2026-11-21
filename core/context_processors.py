@@ -7,6 +7,7 @@ MENU_OPERACION = [
     ("Registros", "journal-text", "historial:registros"),  # HU10 (Karla)
     ("Carnés pendientes", "person-exclamation", "estudiantes:pendientes"),  # HU05 (Karla)
     ("Incidencias", "exclamation-triangle", "historial:incidencias"),  # HU10 / HU15
+    ("Prácticas", "clipboard-data", "historial:practicas"),  # resumen de prácticas (tutoría)
     ("Ayuda", "question-circle", "core:ayuda"),
 ]
 

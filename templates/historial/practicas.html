@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Prácticas{% endblock %}
+{% block estilos %}
+<link rel="stylesheet" href="{% static 'css/administracion.css' %}?v=1">
+<link rel="stylesheet" href="{% static 'css/historial.css' %}?v=2">
+{% endblock %}
+{% block contenido %}
+<div class="encabezado-pagina">
+  <div>
+    <h1>Prácticas</h1>
+    <p>{% if es_administrador %}Resumen de las prácticas de laboratorio de los docentes.{% else %}Resumen de sus prácticas de laboratorio anteriores.{% endif %}</p>
+  </div>
+</div>
+
+<form method="get" class="tarjeta p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="desde">Desde</label><input id="desde" type="date" name="desde" value="{{ filtros.desde }}" class="form-control"></div>
+    <div class="col-6 col-lg-2"><label class="form-label small mb-1" for="hasta">Hasta</label><input id="hasta" type="date" name="hasta" value="{{ filtros.hasta }}" class="form-control"></div>
+    <div class="col-lg-{% if es_administrador %}3{% else %}5{% endif %}"><label class="form-label small mb-1" for="materia">Materia o práctica</label><input id="materia" name="materia" value="{{ filtros.materia }}" class="form-control" placeholder="Todas"></div>
+    {% if es_administrador %}
+    <div class="col-lg-3"><label class="form-label small mb-1" for="docente">Docente</label>
+      <select id="docente" name="docente" class="form-select"><option value="">Todos</option>
+        {% for d in docentes %}<option value="{{ d.pk }}"{% if filtros.docente == d.pk|stringformat:"s" %} selected{% endif %}>{{ d.nombres }} {{ d.apellidos }}</option>{% endfor %}
+      </select></div>
+    {% endif %}
+    <div class="col-lg-2 d-grid"><button type="submit" class="btn btn-epp"><i class="bi bi-funnel me-1"></i>Filtrar</button></div>
+  </div>
+  <div class="small text-muted-epp mt-2">Por defecto se muestran los últimos 30 días. Una misma práctica dada dos veces el mismo día se separa cuando hay más de 2 horas sin verificaciones.</div>
+</form>
+
+<div id="estadoEnvio" class="mb-2" aria-live="polite"></div>
+
+{% if pagina.paginator.count %}
+<div class="tabla-epp table-responsive">
+  <table class="table align-middle mb-0">
+    <thead><tr><th>Fecha y horario</th><th>Materia · Práctica</th><th>Laboratorio</th>{% if es_administrador %}<th>Docente</th>{% endif %}<th class="text-center">Verificados</th><th class="text-center">Cumplieron</th><th></th></tr></thead>
+    <tbody>
+      {% for r in pagina %}
+      <tr>
+        <td class="text-nowrap">{{ r.inicio|date:"d/m/Y" }}<div class="small text-muted-epp">{{ r.inicio|date:"H:i" }} – {{ r.fin|date:"H:i" }}</div></td>
+        <td class="principal">{{ r.materia|default:"Sin materia" }}{% if r.practica %}<div class="small text-muted-epp">{{ r.practica }}</div>{% endif %}</td>
+        <td class="text-muted-epp">{{ r.laboratorios|join:", " }}</td>
+        {% if es_administrador %}<td class="text-muted-epp">{{ r.docente }}</td>{% endif %}
+        <td class="text-center fw-semibold">{{ r.total }}</td>
+        <td class="text-center"><span class="fw-semibold">{{ r.cumplieron }}</span> <span class="small text-muted-epp">({{ r.porcentaje }} %)</span></td>
+        <td class="text-end text-nowrap">
+          <a href="{% url 'verificacion:resumen_practica_imprimir' %}?{{ r.consulta }}" target="_blank" rel="noopener" class="btn btn-sm btn-epp-outline" title="Ver el resumen"><i class="bi bi-eye"></i><span class="d-none d-xl-inline ms-1">Ver</span></a>
+          <a href="{% url 'verificacion:resumen_practica_imprimir' %}?{{ r.consulta }}&amp;imprimir=1" target="_blank" rel="noopener" class="btn btn-sm btn-epp-outline" title="Imprimir o guardar como PDF"><i class="bi bi-printer"></i><span class="d-none d-xl-inline ms-1">Imprimir</span></a>
+          <button type="button" class="btn btn-sm btn-epp-outline js-enviar" data-consulta="{{ r.consulta }}" title="Enviarme el resumen por correo"><i class="bi bi-envelope"></i><span class="d-none d-xl-inline ms-1">Enviarme</span></button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% if pagina.has_other_pages %}
+<div class="d-flex justify-content-between align-items-center mt-3 small">
+  <span class="text-muted-epp">Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  <div class="d-flex gap-2">
+    {% if pagina.has_previous %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.previous_page_number }}">Anterior</a>{% endif %}
+    {% if pagina.has_next %}<a class="btn btn-sm btn-epp-outline" href="?{{ parametros_url }}&pagina={{ pagina.next_page_number }}">Siguiente</a>{% endif %}
+  </div>
+</div>
+{% endif %}
+{% else %}
+<div class="tarjeta p-4 text-center text-muted-epp"><i class="bi bi-clipboard-x fs-3 d-block mb-2"></i>No hay prácticas con verificaciones en este periodo.</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Enviar por correo el resumen de una práctica anterior, sin salir de la página.
+  (function () {
+    const estado = document.getElementById("estadoEnvio");
+    const url = "{% url 'verificacion:resumen_practica_enviar' %}";
+    document.querySelectorAll(".js-enviar").forEach((boton) => {
+      boton.addEventListener("click", async () => {
+        boton.disabled = true;
+        estado.innerHTML = '<div class="aviso aviso-info small">Enviando el resumen…</div>';
+        try {
+          const respuesta = await fetch(url, {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}", "Content-Type": "application/x-www-form-urlencoded" },
+            body: boton.dataset.consulta,
+          });
+          const datos = await respuesta.json();
+          const span = document.createElement("span");
+          span.textContent = datos.mensaje;
+          estado.innerHTML = `<div class="aviso ${datos.ok ? "aviso-ok" : "aviso-error"} small">${span.innerHTML}</div>`;
+        } catch (e) {
+          estado.innerHTML = '<div class="aviso aviso-error small">No se pudo enviar el correo.</div>';
+        } finally {
+          boton.disabled = false;
+        }
+      });
+    });
+  })();
+</script>
+{% endblock %}
