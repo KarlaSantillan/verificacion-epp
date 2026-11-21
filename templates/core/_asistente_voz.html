@@ -1,0 +1,47 @@
+{% comment %}Asistente de voz (prueba): botón en la barra superior de todas las pantallas. Ver static/js/asistente_voz.js.{% endcomment %}
+<style>
+  .btn-voz { position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; color: var(--epp-primary); border: 0; background: transparent; font-size: 1.2rem; }
+  .btn-voz:hover, .btn-voz:focus-visible { background: var(--epp-soft); }
+  .btn-voz.activo { background: var(--epp-primary); color: #fff; }
+  .btn-voz.activo i { animation: pulso-mic 1.4s ease-in-out infinite; }
+  @keyframes pulso-mic { 50% { opacity: .45; } }
+  @media (prefers-reduced-motion: reduce) { .btn-voz.activo i { animation: none; } }
+  .estado-voz { max-width: 260px; }
+  .voz-grupo { display: flex; align-items: center; gap: 2px; }
+  .btn-voz-menu { width: 22px; height: 40px; border: 0; background: transparent; color: var(--epp-primary); border-radius: 8px; font-size: .75rem; }
+  .btn-voz-menu:hover, .btn-voz-menu:focus-visible { background: var(--epp-soft); }
+  .menu-voz { width: 300px; max-width: calc(100vw - 32px); }
+  /* Burbuja «Te escucho»: aparece al detectar la palabra clave */
+  .burbuja-voz { position: relative; background: var(--epp-primary); color: #fff; font-size: .8rem; font-weight: 600; padding: .3rem .65rem; border-radius: 999px; white-space: nowrap; box-shadow: 0 4px 12px rgba(20, 33, 45, .18); }
+  .burbuja-voz::after { content: ""; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); border: 6px solid transparent; border-left-color: var(--epp-primary); border-right: 0; }
+  .burbuja-voz.ok { background: var(--epp-ok); } .burbuja-voz.ok::after { border-left-color: var(--epp-ok); }
+  .burbuja-voz.duda { background: #6b7886; } .burbuja-voz.duda::after { border-left-color: #6b7886; }
+  .burbuja-voz .puntos::after { content: "…"; animation: puntos 1s steps(3, end) infinite; display: inline-block; width: 1em; overflow: hidden; vertical-align: bottom; }
+  @keyframes puntos { from { width: 0; } to { width: 1em; } }
+</style>
+<span id="estadoVoz" class="estado-voz small text-truncate d-none d-md-inline" aria-live="polite"></span>
+<span id="burbujaVoz" class="burbuja-voz d-none" role="status" aria-live="assertive"></span>
+<div class="voz-grupo dropdown">
+<button id="btnVoz" type="button" class="btn-voz" aria-pressed="false"
+        title="Asistente de voz: diga «Sistema, …». Por ejemplo: «Sistema, ir a registros» o «Sistema, ayuda»."
+        data-docente="{{ user.nombres }}"
+        data-url-inicio="{% url 'core:inicio' %}"
+        data-url-verificacion="{% url 'verificacion:verificar' %}"
+        data-url-registros="{% url 'historial:registros' %}"
+        data-url-incidencias="{% url 'historial:incidencias' %}"
+        data-url-reincidentes="{% url 'historial:incidencias' %}?tab=reincidentes"
+        data-url-practicas="{% url 'historial:practicas' %}"
+        data-url-ayuda="{% url 'core:ayuda' %}"
+        data-url-hoy="{% url 'historial:registros' %}?desde={% now 'Y-m-d' %}&hasta={% now 'Y-m-d' %}&mios=1">
+  <i class="bi bi-mic-mute"></i>
+</button>
+<button type="button" class="btn-voz-menu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Elegir la voz del asistente">
+  <i class="bi bi-chevron-down"></i>
+</button>
+<div class="dropdown-menu dropdown-menu-end menu-voz p-3 shadow">
+  <div class="fw-semibold mb-1">Voz del asistente</div>
+  <p class="small text-muted-epp mb-2">Las voces «Natural» de Microsoft Edge son las más parecidas a una persona.</p>
+  <select id="selectorVoz" class="form-select form-select-sm mb-2" aria-label="Voz del asistente"></select>
+  <button type="button" id="btnProbarVoz" class="btn btn-sm btn-epp-outline w-100"><i class="bi bi-volume-up me-1"></i>Probar voz</button>
+</div>
+</div>

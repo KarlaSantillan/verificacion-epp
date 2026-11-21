@@ -32,6 +32,7 @@
 <nav class="ayuda-indice d-flex flex-wrap gap-2 mb-4" aria-label="Secciones de la ayuda">
   <a href="#guia"><i class="bi bi-signpost-2 me-1"></i>Guía rápida</a>
   <a href="#recomendaciones"><i class="bi bi-lightbulb me-1"></i>Recomendaciones</a>
+  <a href="#voz"><i class="bi bi-mic me-1"></i>Asistente de voz</a>
   <a href="#preguntas"><i class="bi bi-question-circle me-1"></i>Preguntas frecuentes</a>
   <a href="#estados"><i class="bi bi-tags me-1"></i>Estados</a>
   {% if es_administrador %}<a href="#administracion"><i class="bi bi-shield-lock me-1"></i>Administración</a>{% endif %}
@@ -104,6 +105,71 @@
           <li>Con «Detener cámara» puede pausar la detección sin salir de la pantalla.</li>
           <li>Las imágenes de la cámara no se guardan: solo se registra el resultado.</li>
         </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Asistente de voz -->
+<section id="voz" class="ayuda-seccion mb-4">
+  <h2 class="fs-5 fw-semibold mb-3">Asistente de voz</h2>
+  <div class="row g-3 mb-3">
+    <div class="col-md-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-mic"></i></span><span class="fw-semibold">Cómo usarlo</span></div>
+        <ol class="ayuda-lista small">
+          <li>Pulse el <strong>micrófono</strong> de la barra superior y permita el acceso al micrófono.</li>
+          <li>Diga primero la palabra clave <strong>«Sistema»</strong> y luego la orden. Ejemplo: <em>«Sistema, siguiente»</em>.</li>
+          <li>Al detectar «Sistema» aparece <strong>«Te escucho…»</strong>; luego <strong>«Listo»</strong> si ejecutó la orden o <strong>«No entendí»</strong>.</li>
+          <li>Para apagarlo, pulse otra vez el micrófono. Si lo deja encendido, sigue activo al cambiar de pantalla.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-volume-up"></i></span><span class="fw-semibold">Para tener en cuenta</span></div>
+        <ul class="ayuda-lista small">
+          <li>Funciona en <strong>Microsoft Edge</strong> o <strong>Google Chrome</strong> y necesita internet para entender las órdenes.</li>
+          <li>Lo que se dice sin la palabra «Sistema» se ignora. No se guarda ningún audio.</li>
+          <li>Con la flecha junto al micrófono puede <strong>elegir y probar la voz</strong>. Las voces «Natural» de Edge son las más naturales.</li>
+          <li>Las acciones que cierran la práctica piden confirmación: «Sistema, confirmar» o «Sistema, cancelar».</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="fw-semibold mb-2">Durante la verificación</div>
+        <table class="table table-sm tabla-estados small mb-0">
+          <tbody>
+            <tr><td class="text-nowrap"><em>«Sistema, iniciar cámara»</em></td><td>Enciende la cámara para leer el QR (o la reanuda en la detección).</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, continuar»</em></td><td>Pasa a la verificación de EPP después de identificar al estudiante.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, otra vez»</em></td><td>Verificar de nuevo.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, registrar»</em></td><td>Registra el intento no conforme.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, siguiente»</em></td><td>Pasa al siguiente estudiante.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, detener»</em></td><td>Detiene la cámara.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, nueva práctica»</em></td><td>Muestra el resumen de la clase y pide confirmar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="tarjeta p-3 h-100">
+        <div class="fw-semibold mb-2">Para moverse por el sistema</div>
+        <table class="table table-sm tabla-estados small mb-0">
+          <tbody>
+            <tr><td class="text-nowrap"><em>«Sistema, ir a inicio»</em></td><td>Abre el dashboard.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, ir a verificación»</em></td><td>Abre la verificación en vivo.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, mis registros de hoy»</em></td><td>Abre sus registros del día.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, ir a registros / incidencias»</em></td><td>Abre esas pantallas.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, reincidentes»</em></td><td>Abre la lista de estudiantes reincidentes.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, ir a prácticas»</em></td><td>Abre los resúmenes de prácticas.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, volver»</em></td><td>Regresa a la pantalla anterior.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, cambiar voz»</em></td><td>Cambia la voz del asistente.</td></tr>
+            <tr><td class="text-nowrap"><em>«Sistema, ayuda»</em></td><td>El asistente dice los comandos disponibles.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

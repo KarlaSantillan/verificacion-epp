@@ -81,6 +81,7 @@
       <i class="bi bi-list fs-3"></i>
     </button>
     <div class="ms-auto d-flex align-items-center gap-2">
+      {% include "core/_asistente_voz.html" %}
       {% include "seguimiento/_campana.html" %}
       <span class="badge-rol {% if es_administrador %}admin{% endif %}">
         <i class="bi {% if es_administrador %}bi-shield-lock-fill{% else %}bi-person-workspace{% endif %} me-1"></i>{{ rol_etiqueta }}
@@ -99,6 +100,7 @@
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
 <script src="{% static 'js/epp.js' %}"></script>
 <script src="{% static 'js/campana.js' %}?v=3"></script>
+<script src="{% static 'js/asistente_voz.js' %}?v=3"></script>
 {% block scripts %}{% endblock %}
 
 <script type="speculationrules">
