@@ -13,6 +13,7 @@ from estudiantes.servicios import (
     identificar_por_codigo,
     identificar_por_qr,
     ocultar_cedula,
+    ocultar_correo,
     validar_codigo,
 )
 
@@ -97,7 +98,9 @@ def identificar(request):
                 "fin_vigencia": carnet.fecha_fin_vigencia.isoformat() if carnet.fecha_fin_vigencia else None,
             },
             "estudiante": {
+                "id": estudiante.pk,
                 "nombre": str(estudiante),
+                "correo": ocultar_correo(estudiante.correo),
                 "cedula": ocultar_cedula(estudiante.cedula),
                 "carrera": estudiante.carrera,
                 "nivel": estudiante.nivel,

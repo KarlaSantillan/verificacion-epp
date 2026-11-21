@@ -15,7 +15,8 @@ TABLAS = {
     "epp_p_correccion_validacion": "Corrección",
     "epp_t_llamado_atencion": "Llamado de atención",
 }
-ACCIONES = {"INSERT": "Creación", "UPDATE": "Modificación", "DELETE": "Desactivación", "LOGIN": "Inicio de sesión"}
+ACCIONES = {"INSERT": "Creación", "UPDATE": "Modificación", "DELETE": "Desactivación", "LOGIN": "Inicio de sesión",
+            "NOTIFICACION": "Notificación por correo"}
 CAMPOS = {
     "id_rol": "Rol", "id_laboratorio": "Laboratorio", "id_epp": "EPP", "id_estudiante": "Estudiante", "id_carnet": "Carné",
     "id_periodo": "Periodo", "id_modelo": "Modelo", "id_usuario": "Usuario", "id_usuario_registro": "Registrado por",
@@ -25,7 +26,7 @@ CAMPOS = {
     "codigo_validacion": "Código del carné", "fecha_inicio": "Fecha de inicio", "fecha_fin": "Fecha de fin",
     "fecha_inicio_vigencia": "Inicio de vigencia", "fecha_fin_vigencia": "Fin de vigencia", "cedula": "Cédula",
     "descripcion": "Descripción", "ubicacion": "Ubicación", "contrasena": "Contraseña", "tipo_error": "Tipo de error",
-    "valor_anterior": "Valor anterior", "valor_nuevo": "Valor nuevo", "cantidad_incidencias": "Incidencias",
+    "valor_anterior": "Valor anterior", "valor_nuevo": "Valor nuevo", "cantidad_incidencias": "Incidencias", "correo": "Correo",
 }
 
 
@@ -68,6 +69,8 @@ def describir_cambios(evento):
     """Frases del recuadro "Qué pasó"."""
     if evento.accion == "LOGIN":
         return ["Se inició sesión. No se modificó ningún dato."]
+    if evento.accion == "NOTIFICACION":
+        return [evento.descripcion or "Intento de notificación por correo. No se modificó ningún dato."]
     if evento.accion == "INSERT":
         return [f"Se agregó un registro nuevo con {len(evento.datos_nuevos or {})} datos."]
     antes, despues = evento.datos_anteriores or {}, evento.datos_nuevos or {}

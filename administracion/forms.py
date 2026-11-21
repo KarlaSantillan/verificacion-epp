@@ -6,7 +6,7 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 
 from configuracion.models import Epp, Laboratorio, ModeloVision, Parametro, PeriodoAcademico
-from estudiantes.forms import validar_cedula
+from estudiantes.forms import validar_cedula, validar_correo_unemi
 from estudiantes.models import Estudiante
 from usuarios.models import Rol, Usuario
 
@@ -112,11 +112,15 @@ class EppForm(EstiloEpp, forms.ModelForm):
 class EstudianteForm(EstiloEpp, forms.ModelForm):
     class Meta:
         model = Estudiante
-        fields = ["nombres", "apellidos", "cedula", "carrera", "facultad", "modalidad", "nivel", "activo"]
-        labels = {"cedula": "Cédula (opcional)"}
+        fields = ["nombres", "apellidos", "cedula", "correo", "carrera", "facultad", "modalidad", "nivel", "activo"]
+        labels = {"cedula": "Cédula (opcional)", "correo": "Correo institucional (opcional)"}
+        help_texts = {"correo": "Se usa para notificar al estudiante cuando se registra un llamado de atención."}
 
     def clean_cedula(self):
         return validar_cedula(self.cleaned_data.get("cedula")) or None
+
+    def clean_correo(self):
+        return validar_correo_unemi(self.cleaned_data.get("correo")) or None
 
 
 # ---------------------------------------------------------------- Usuarios (HU13-CA02)

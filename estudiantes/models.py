@@ -14,6 +14,8 @@ class Estudiante(models.Model):
     facultad = models.CharField(max_length=120, null=True, blank=True)
     modalidad = models.CharField(max_length=30, null=True, blank=True)
     nivel = models.CharField(max_length=50, null=True, blank=True)
+    # Correo institucional para notificar el llamado de atención (HU16). Opcional: el SGA no lo entrega.
+    correo = models.EmailField(max_length=120, null=True, blank=True)
     activo = models.BooleanField(default=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
@@ -28,6 +30,7 @@ class Estudiante(models.Model):
         # Una cédula vacía se guarda como NULL para no romper la restricción UNIQUE.
         if not self.cedula:
             self.cedula = None
+        self.correo = (self.correo or "").strip().lower() or None
         super().save(*args, **kwargs)
 
     def __str__(self):

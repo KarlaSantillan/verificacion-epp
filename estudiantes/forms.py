@@ -7,6 +7,25 @@ def validar_cedula(valor):
         raise forms.ValidationError("La cédula debe tener 10 dígitos.")
     return cedula
 
+DOMINIO_INSTITUCIONAL = "@unemi.edu.ec"
+
+
+def validar_correo_unemi(valor):
+    """Correo institucional del estudiante. Vacío se permite; si se escribe, debe ser @unemi.edu.ec."""
+    from django.core.validators import validate_email
+
+    correo = (valor or "").strip().lower()
+    if not correo:
+        return ""
+    try:
+        validate_email(correo)
+    except forms.ValidationError:
+        raise forms.ValidationError("Escriba un correo válido.")
+    if not correo.endswith(DOMINIO_INSTITUCIONAL):
+        raise forms.ValidationError(f"Use el correo institucional del estudiante ({DOMINIO_INSTITUCIONAL}).")
+    return correo
+
+
 class CompletarCarnetForm(forms.Form):
     """Datos que el docente copia de la página de validación del SGA (HU05)."""
 

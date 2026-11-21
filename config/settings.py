@@ -140,11 +140,32 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Sin CORREO_HOST en el .env, los correos se muestran en la consola (demostración).
+# Con CORREO_HOST, se envían por SMTP (por ejemplo, el servidor institucional o Gmail).
+if os.getenv("CORREO_HOST"):
+    MAILERS = {
+        "default": {
+            "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+            "OPTIONS": {
+                "host": os.getenv("CORREO_HOST"),
+                "port": int(os.getenv("CORREO_PUERTO", "587")),
+                "username": os.getenv("CORREO_USUARIO", ""),
+                "password": os.getenv("CORREO_CLAVE", ""),
+                "use_tls": os.getenv("CORREO_TLS", "1") == "1",
+                "timeout": 10,
+            },
+        },
+    }
+else:
+    MAILERS = {
+        "default": {
+            "BACKEND": "django.core.mail.backends.console.EmailBackend",
+        },
+    }
+
+# Remitente de las notificaciones (HU16). Con Gmail debe ser la misma cuenta de CORREO_USUARIO.
+CORREO_REMITENTE = os.getenv("CORREO_REMITENTE", "no-responder@unemi.edu.ec")
+CORREO_NOMBRE = os.getenv("CORREO_NOMBRE", "Sistema de Verificación de EPP")  # nombre que ve el estudiante
 
 AUTH_USER_MODEL = "usuarios.Usuario"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"

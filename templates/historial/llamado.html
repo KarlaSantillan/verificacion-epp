@@ -15,14 +15,18 @@
   {% if situacion %}
   <dl class="row g-2 small mb-3">
     <div class="col-6"><dt class="text-muted-epp fw-normal">Incidencias desde el último llamado</dt><dd class="fw-semibold mb-0">{{ situacion.desde_ultimo_llamado }}</dd></div>
-    <div class="col-6"><dt class="text-muted-epp fw-normal">EPP más faltante</dt><dd class="fw-semibold mb-0">{{ situacion.epp_mas_faltante|default:"—" }}</dd></div>
+    <div class="col-6"><dt class="text-muted-epp fw-normal">EPP que faltaron (veces)</dt><dd class="fw-semibold mb-0">{{ situacion.resumen_faltantes|default:"—" }}</dd></div>
   </dl>
   {% endif %}
   <div class="mb-3">
     <label for="observacion" class="form-label small fw-semibold mb-1">Observación (obligatoria) *</label>
     <textarea id="observacion" name="observacion" rows="4" class="form-control" placeholder="Describa el llamado de atención realizado al estudiante.">{{ observacion }}</textarea>
   </div>
-  <div class="aviso aviso-info small mb-3"><i class="bi bi-info-circle me-1"></i>El sistema no contacta al estudiante: registra el llamado que usted realizó. Después, el conteo de incidencias vuelve a empezar.</div>
+  {% if correo %}
+  <div class="aviso aviso-info small mb-3"><i class="bi bi-envelope me-1"></i>Al registrar el llamado se enviará una notificación a <strong>{{ correo }}</strong> con esta observación. Después, el conteo de incidencias vuelve a empezar.</div>
+  {% else %}
+  <div class="aviso aviso-warn small mb-3"><i class="bi bi-envelope-slash me-1"></i>El estudiante no tiene correo registrado: el llamado se guardará, pero no se le podrá notificar.{% if es_administrador %} Puede agregarlo en <a href="{% url 'administracion:estudiante_editar' estudiante.pk %}">Estudiantes y carnés</a>.{% endif %} Después, el conteo de incidencias vuelve a empezar.</div>
+  {% endif %}
   <div class="d-flex gap-2 justify-content-end">
     <a href="{% url 'historial:incidencias' %}?tab=reincidentes&periodo={{ periodo.pk }}" class="btn btn-epp-outline px-4">Cancelar</a>
     <button type="submit" class="btn btn-epp px-4">Registrar llamado</button>

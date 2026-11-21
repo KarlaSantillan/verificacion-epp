@@ -10,11 +10,13 @@ from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from configuracion.models import Laboratorio
 from estudiantes.models import Estudiante
-from estudiantes.servicios import ocultar_cedula
+from estudiantes.servicios import ocultar_cedula, ocultar_correo
 from seguimiento.models import LlamadoAtencion
+from seguimiento.notificacion import ENVIADO, SIN_CORREO, estado_de_notificaciones, notificar_llamado
 from seguimiento.reincidencia import (
     OBSERVACION, REGISTRADO, REQUIERE, LlamadoNoValido, periodo_de_trabajo, registrar_llamado, reincidentes, umbral,
 )
@@ -125,13 +127,35 @@ def _situacion(request, id_estudiante):
 def historial_estudiante(request, id_estudiante):
     """Incidencias del periodo y llamados anteriores de un estudiante."""
     estudiante, periodo, situacion = _situacion(request, id_estudiante)
-    llamados = LlamadoAtencion.objects.filter(estudiante=estudiante, periodo=periodo).select_related("usuario").order_by("-fecha_hora")
+    llamados = list(LlamadoAtencion.objects.filter(estudiante=estudiante, periodo=periodo).select_related("usuario").order_by("-fecha_hora"))
+    estados = estado_de_notificaciones(llamados)
+    for l in llamados:
+        l.estado_correo = estados.get(l.pk)
     incidencias_lista = situacion.incidencias if situacion else []
     for validacion in incidencias_lista:
         validacion.faltantes = faltantes(validacion)
     contexto = {"estudiante": estudiante, "periodo": periodo, "situacion": situacion, "incidencias": incidencias_lista, "llamados": llamados,
-                "cedula": ocultar_cedula(estudiante.cedula)}
+                "cedula": ocultar_cedula(estudiante.cedula), "correo": ocultar_correo(estudiante.correo)}
     return render(request, "historial/reincidente.html", contexto)
+
+
+def _mensaje_envio(request, envio, estudiante):
+    if envio == ENVIADO:
+        messages.success(request, f"Se notificó al estudiante en {ocultar_correo(estudiante.correo)}.")
+    elif envio == SIN_CORREO:
+        messages.warning(request, "No se envió la notificación: el estudiante no tiene correo registrado.")
+    else:
+        messages.warning(request, "No se pudo enviar el correo de notificación (revise la conexión a internet). "
+                                  "Puede reenviarlo desde el historial del estudiante.")
+
+
+@login_required
+@require_POST
+def reenviar_notificacion(request, id_llamado):
+    """Reenvía el correo de un llamado ya registrado, por ejemplo cuando no había internet (RNF10)."""
+    registro = get_object_or_404(LlamadoAtencion.objects.select_related("estudiante", "periodo", "usuario"), pk=id_llamado)
+    _mensaje_envio(request, notificar_llamado(registro, usuario=request.user), registro.estudiante)
+    return redirect(f"{reverse('historial:reincidente', args=[registro.estudiante_id])}?periodo={registro.periodo_id}")
 
 
 @login_required
@@ -142,13 +166,16 @@ def llamado(request, id_estudiante):
     if request.method == "POST":
         observacion = request.POST.get("observacion", "")
         try:
-            registrar_llamado(estudiante=estudiante, periodo=periodo, usuario=request.user, observacion=observacion)
+            nuevo = registrar_llamado(estudiante=estudiante, periodo=periodo, usuario=request.user, observacion=observacion)
         except LlamadoNoValido as excepcion:
             error = str(excepcion)
         else:
             messages.success(request, f"Llamado de atención registrado para {estudiante}.")
+            # Notificación por correo: nunca impide que el llamado quede registrado.
+            _mensaje_envio(request, notificar_llamado(nuevo, usuario=request.user), estudiante)
             return redirect(f"{reverse('historial:incidencias')}?tab=reincidentes&periodo={periodo.pk}")
-    contexto = {"estudiante": estudiante, "periodo": periodo, "situacion": situacion, "observacion": observacion, "error": error}
+    contexto = {"estudiante": estudiante, "periodo": periodo, "situacion": situacion, "observacion": observacion, "error": error,
+                "correo": ocultar_correo(estudiante.correo)}
     return render(request, "historial/llamado.html", contexto)
 
 

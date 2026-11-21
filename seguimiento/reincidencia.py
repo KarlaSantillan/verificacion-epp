@@ -54,6 +54,12 @@ class Reincidente:
     estado: str
     ultimo_llamado: LlamadoAtencion | None = None
     incidencias: list = field(default_factory=list)
+    epp_faltantes: list = field(default_factory=list)  # [(nombre, veces)] de mayor a menor
+
+    @property
+    def resumen_faltantes(self):
+        """Todos los EPP que faltaron y cuántas veces: «Mascarilla (12), Bata (11)»."""
+        return ", ".join(f"{nombre} ({veces})" for nombre, veces in self.epp_faltantes)
 
     @property
     def requiere_llamado(self):
@@ -109,6 +115,7 @@ def reincidentes(periodo, laboratorio=None):
                 estado=estado,
                 ultimo_llamado=ultimo,
                 incidencias=list(reversed(lista)),
+                epp_faltantes=faltantes.most_common(),
             )
         )
     orden = {REQUIERE: 0, OBSERVACION: 1, REGISTRADO: 2}

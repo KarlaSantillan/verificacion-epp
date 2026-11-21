@@ -12,6 +12,7 @@ urlpatterns = [
     path("reincidentes/csv/", views.reincidentes_csv, name="reincidentes_csv"),  # HU16
     path("reincidentes/<int:id_estudiante>/", views.historial_estudiante, name="reincidente"),  # HU15
     path("reincidentes/<int:id_estudiante>/llamado/", views.llamado, name="llamado"),  # HU16
+    path("llamados/<int:id_llamado>/notificar/", views.reenviar_notificacion, name="reenviar_notificacion"),  # HU16 / RNF10
     path("validacion/<int:pk>/", views.detalle, name="detalle"),
     path("validacion/<int:pk>/corregir/<int:id_detalle>/", views.corregir, name="corregir"),
     path("validacion/<int:pk>/practica/", views_practica.editar_practica, name="editar_practica"),

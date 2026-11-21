@@ -144,6 +144,16 @@ def identificar_por_qr(texto_qr, usuario):
     return identificar_por_codigo(extraer_codigo(texto_qr), usuario)
 
 
+def ocultar_correo(correo):
+    """Muestra el inicio y el final del usuario del correo: ks••••••c3@unemi.edu.ec (RNF06)."""
+    if not correo or "@" not in correo:
+        return correo
+    usuario, dominio = correo.split("@", 1)
+    if len(usuario) <= 4:
+        return f"{usuario[:1]}{'•' * (len(usuario) - 1)}@{dominio}"
+    return f"{usuario[:2]}{'•' * (len(usuario) - 4)}{usuario[-2:]}@{dominio}"
+
+
 def ocultar_cedula(cedula):
     """Muestra solo los dos primeros y dos últimos dígitos (RNF06)."""
     if not cedula or len(cedula) < 5:

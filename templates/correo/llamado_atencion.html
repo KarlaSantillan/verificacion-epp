@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Llamado de atención por uso de EPP</title>
+</head>
+<body style="margin:0; padding:0; background:#eef1f5;">
+<!-- Correo HTML: tablas y estilos en línea para que se vea igual en Gmail y Outlook. -->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef1f5; padding:24px 12px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%; max-width:600px; background:#ffffff; border:1px solid #d9dee5; font-family:Segoe UI, Arial, Helvetica, sans-serif; color:#1c2a38;">
+
+        <!-- Encabezado -->
+        <tr>
+          <td style="background:#1c3247; padding:22px 28px 18px 28px;">
+            <div style="font-size:12px; letter-spacing:1.5px; text-transform:uppercase; color:#f6a61e; font-weight:700;">Notificación académica</div>
+            <div style="font-size:22px; line-height:28px; color:#ffffff; font-weight:700; margin-top:4px;">Sistema de Verificación de EPP</div>
+            <div style="font-size:13px; color:#c9d4de; margin-top:2px;">Laboratorios de Biotecnología &middot; UNEMI</div>
+          </td>
+        </tr>
+        <tr><td style="height:5px; background:#f6a61e; font-size:0; line-height:0;">&nbsp;</td></tr>
+
+        <!-- Saludo -->
+        <tr>
+          <td style="padding:26px 28px 6px 28px;">
+            <div style="display:inline-block; background:#fff4dc; color:#8a5a00; border:1px solid #f6c66b; border-radius:999px; padding:4px 12px; font-size:12px; font-weight:700;">LLAMADO DE ATENCIÓN REGISTRADO</div>
+            <p style="font-size:15px; line-height:23px; margin:18px 0 0 0;">Estimado/a <strong>{{ estudiante }}</strong>:</p>
+            <p style="font-size:14px; line-height:22px; margin:10px 0 0 0; color:#3b4a59;">
+              Le informamos que se registró un llamado de atención por no cumplir con el equipo de protección
+              personal (EPP) exigido para el ingreso a los laboratorios de Biotecnología, conforme al Protocolo de Bioseguridad de la institución.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Datos del llamado -->
+        <tr>
+          <td style="padding:18px 28px 4px 28px;">
+            <div style="font-size:13px; font-weight:700; color:#1c3247; text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px;">Detalle del registro</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse; font-size:14px;">
+              <tr>
+                <td style="width:42%; background:#f4f6f9; border:1px solid #dde2e8; padding:10px 12px; font-weight:600;">Periodo académico</td>
+                <td style="border:1px solid #dde2e8; padding:10px 12px;">{{ periodo }}</td>
+              </tr>
+              <tr>
+                <td style="background:#f4f6f9; border:1px solid #dde2e8; padding:10px 12px; font-weight:600;">Incidencias registradas</td>
+                <td style="border:1px solid #dde2e8; padding:10px 12px; font-weight:700; color:#b42318;">{{ incidencias }}</td>
+              </tr>
+              {% if faltantes %}
+              <tr>
+                <td style="background:#f4f6f9; border:1px solid #dde2e8; padding:10px 12px; font-weight:600;">EPP que faltaron (veces)</td>
+                <td style="border:1px solid #dde2e8; padding:10px 12px;">{{ faltantes }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <td style="background:#f4f6f9; border:1px solid #dde2e8; padding:10px 12px; font-weight:600;">Fecha del llamado</td>
+                <td style="border:1px solid #dde2e8; padding:10px 12px;">{{ fecha }}</td>
+              </tr>
+              <tr>
+                <td style="background:#f4f6f9; border:1px solid #dde2e8; padding:10px 12px; font-weight:600;">Registrado por</td>
+                <td style="border:1px solid #dde2e8; padding:10px 12px;">{{ docente }}</td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Observación -->
+        <tr>
+          <td style="padding:20px 28px 4px 28px;">
+            <div style="font-size:13px; font-weight:700; color:#1c3247; text-transform:uppercase; letter-spacing:.8px; margin-bottom:8px;">Observación del docente</div>
+            <div style="border-left:4px solid #f6a61e; background:#fffaf0; padding:12px 16px; font-size:14px; line-height:22px; font-style:italic; color:#2b3a49;">
+              {{ observacion|linebreaksbr }}
+            </div>
+          </td>
+        </tr>
+
+        <!-- Recordatorio -->
+        <tr>
+          <td style="padding:20px 28px 26px 28px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#1c3247; border-radius:6px;">
+              <tr>
+                <td style="padding:14px 16px; font-size:13px; line-height:20px; color:#ffffff;">
+                  <strong style="color:#f6a61e;">Recuerde:</strong> para ingresar al laboratorio debe usar bata, guantes, gafas de seguridad y mascarilla,
+                  según los requisitos de cada práctica. Si tiene alguna inquietud, acérquese a su docente.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Pie -->
+        <tr>
+          <td style="background:#f4f6f9; border-top:1px solid #dde2e8; padding:14px 28px; font-size:11px; line-height:17px; color:#6b7886;">
+            Mensaje generado automáticamente por el Sistema de Verificación de EPP. Por favor, no responda a este correo.<br>
+            Este mensaje contiene información académica dirigida únicamente a su destinatario.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

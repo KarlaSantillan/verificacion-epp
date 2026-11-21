@@ -38,6 +38,17 @@
     <div class="fw-semibold text-heading">{{ l.fecha_hora|date:"d/m/Y H:i" }} · {{ l.usuario.nombres }} {{ l.usuario.apellidos }}</div>
     <div class="text-muted-epp">{{ l.cantidad_incidencias }} incidencia{{ l.cantidad_incidencias|pluralize }} considerada{{ l.cantidad_incidencias|pluralize }}</div>
     <div class="mt-1">«{{ l.observacion }}»</div>
+    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+      {% if l.estado_correo == "enviado" %}<span class="text-success"><i class="bi bi-envelope-check me-1"></i>Notificación enviada</span>
+      {% elif l.estado_correo == "error" %}<span class="text-danger"><i class="bi bi-envelope-exclamation me-1"></i>No se pudo enviar la notificación</span>
+      {% elif l.estado_correo == "sin_correo" %}<span class="text-muted-epp"><i class="bi bi-envelope-slash me-1"></i>Sin correo registrado al momento del llamado</span>
+      {% else %}<span class="text-muted-epp"><i class="bi bi-envelope me-1"></i>Sin notificación por correo</span>{% endif %}
+      {% if correo %}
+      <form method="post" action="{% url 'historial:reenviar_notificacion' l.pk %}" class="ms-auto">{% csrf_token %}
+        <button type="submit" class="btn btn-sm btn-epp-outline"><i class="bi bi-send me-1"></i>{% if l.estado_correo == "enviado" %}Reenviar{% else %}Enviar{% endif %} notificación</button>
+      </form>
+      {% endif %}
+    </div>
   </div>
   {% empty %}<p class="small text-muted-epp mb-0">Sin llamados de atención en este periodo.</p>{% endfor %}
 </div>

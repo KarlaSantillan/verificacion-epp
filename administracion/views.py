@@ -289,7 +289,7 @@ def auditoria(request):
         "pagina": pagina,
         "filtros": filtros,
         "parametros_url": urlencode({k: v for k, v in filtros.items() if v}),
-        "acciones": Auditoria.ACCIONES,
+        "acciones": Auditoria.ACCIONES + [("NOTIFICACION", "Notificación por correo")],
         "tablas": [(t, tabla_texto(t)) for t in todos.order_by("tabla_afectada").values_list("tabla_afectada", flat=True).distinct()],
         "usuarios": Usuario.objects.filter(eventos_auditoria__isnull=False).distinct().order_by("apellidos"),
         "totales": {

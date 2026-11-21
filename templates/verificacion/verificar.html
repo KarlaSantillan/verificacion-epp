@@ -157,6 +157,7 @@
     urlDetectar: "{% url 'verificacion:detectar' %}",
     urlEvaluar: "{% url 'verificacion:evaluar' %}",
     urlRegistrar: "{% url 'verificacion:registrar' %}",
+    urlCorreo: "{% url 'verificacion:correo_estudiante' %}",
     csrf: "{{ csrf_token }}",
   };
 </script>
@@ -165,5 +166,6 @@
 <script src="{% static 'js/guia_posicion.js' %}?v=1"></script>
 <script src="{% static 'js/registro_validacion.js' %}?v=1"></script>
 <script src="{% static 'js/aviso_reincidente.js' %}?v=1"></script>
+<script src="{% static 'js/correo_estudiante.js' %}?v=1"></script>
 <script src="{% static 'js/sesion_practica.js' %}?v=1"></script>
 {% endblock %}

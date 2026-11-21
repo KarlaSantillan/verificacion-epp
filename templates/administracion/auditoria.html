@@ -38,7 +38,7 @@
       <tr>
         <td class="text-nowrap text-muted-epp">{{ e.fecha_hora|date:"d/m/Y H:i" }}</td>
         <td><span class="principal">{% if e.usuario %}{{ e.usuario.nombres }} {{ e.usuario.apellidos }}{% else %}Sistema{% endif %}</span><span class="d-block small text-muted-epp">{{ e.get_tipo_actor_display }}</span></td>
-        <td><span class="estado{% if e.accion == 'INSERT' %} on{% endif %}"><i class="bi {% if e.accion == 'INSERT' %}bi-plus-circle{% elif e.accion == 'UPDATE' %}bi-pencil-square{% elif e.accion == 'DELETE' %}bi-dash-circle{% else %}bi-box-arrow-in-right{% endif %}"></i> {{ e.accion_texto }}</span></td>
+        <td><span class="estado{% if e.accion == 'INSERT' %} on{% endif %}"><i class="bi {% if e.accion == 'INSERT' %}bi-plus-circle{% elif e.accion == 'UPDATE' %}bi-pencil-square{% elif e.accion == 'DELETE' %}bi-dash-circle{% elif e.accion == 'NOTIFICACION' %}bi-envelope{% else %}bi-box-arrow-in-right{% endif %}"></i> {{ e.accion_texto }}</span></td>
         <td><span class="fw-medium">{{ e.tabla_texto }}</span>{% if e.id_registro_afectado %} <span class="small text-muted-epp">#{{ e.id_registro_afectado }}</span>{% endif %}</td>
         <td class="text-muted-epp" style="max-width: 320px">{{ e.descripcion|default:"Sin descripción" }}</td>
         <td class="text-end"><a href="{% url 'administracion:auditoria_detalle' e.pk %}" class="btn btn-sm btn-epp-outline"><i class="bi bi-eye"></i> Ver</a></td>
