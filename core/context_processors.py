@@ -49,9 +49,14 @@ def menu(request):
         return {}
     es_admin = usuario.es_administrador
     iniciales = f"{(usuario.nombres or ' ')[0]}{(usuario.apellidos or ' ')[0]}".strip().upper()
+    operacion = _items(request, MENU_OPERACION)
+    administracion = _items(request, MENU_ADMINISTRACION) if es_admin else []
     return {
-        "menu_operacion": _items(request, MENU_OPERACION),
-        "menu_administracion": _items(request, MENU_ADMINISTRACION) if es_admin else [],
+        "menu_operacion": operacion,
+        "menu_administracion": administracion,
+        # Asistente de voz: solo puede abrir las secciones que el rol ve en su menú (solo navegación, sin modificar datos).
+        "voz_secciones": [{"nombre": i["nombre"], "url": i["url"]} for i in operacion + administracion if i["url"]],
+        "voz_secciones_admin": [nombre for nombre, _, _ in MENU_ADMINISTRACION],
         "es_administrador": es_admin,
         "rol_etiqueta": "Administrador" if es_admin else "Docente/Encargado",
         "usuario_iniciales": iniciales,

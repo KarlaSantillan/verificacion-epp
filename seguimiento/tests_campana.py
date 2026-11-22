@@ -106,3 +106,20 @@ class CampanaYFiltroTests(TestCase):
         contenido = self.client.get(reverse("historial:registros_csv")).content.decode("utf-8-sig")
         filas = [linea for linea in contenido.splitlines() if linea.strip()]
         self.assertEqual(len(filas), 2)  # encabezado + 1 fila (solo la de Dora)
+
+
+    # --- Asistente de voz: navegación según el rol
+    def test_voz_docente_no_tiene_secciones_de_administracion(self):
+        self.entrar("dora@prueba.ec")
+        respuesta = self.client.get(reverse("historial:registros"))
+        nombres = [s["nombre"] for s in respuesta.context["voz_secciones"]]
+        self.assertIn("Registros", nombres)
+        self.assertNotIn("Laboratorios", nombres)
+        self.assertNotIn("Usuarios y roles", nombres)
+
+    def test_voz_administrador_puede_navegar_a_administracion(self):
+        self.entrar("admin@prueba.ec")
+        respuesta = self.client.get(reverse("historial:registros"))
+        nombres = [s["nombre"] for s in respuesta.context["voz_secciones"]]
+        self.assertIn("Laboratorios", nombres)
+        self.assertContains(respuesta, 'id="voz-secciones"')

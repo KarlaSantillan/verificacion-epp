@@ -119,8 +119,8 @@
         <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-mic"></i></span><span class="fw-semibold">Cómo usarlo</span></div>
         <ol class="ayuda-lista small">
           <li>Pulse el <strong>micrófono</strong> de la barra superior y permita el acceso al micrófono.</li>
-          <li>Diga primero la palabra clave <strong>«Sistema»</strong> y luego la orden. Ejemplo: <em>«Sistema, siguiente»</em>.</li>
-          <li>Al detectar «Sistema» aparece <strong>«Te escucho…»</strong>; luego <strong>«Listo»</strong> si ejecutó la orden o <strong>«No entendí»</strong>.</li>
+          <li>Diga primero la palabra clave <strong>«Asistente»</strong> y luego la orden, de corrido. Ejemplo: <em>«Asistente, siguiente»</em>.</li>
+          <li>Al detectar la palabra clave aparece <strong>«Te escucho…»</strong>; luego <strong>«Listo»</strong> si ejecutó la orden o <strong>«No entendí»</strong>. Una orden nueva interrumpe lo que el asistente esté diciendo.</li>
           <li>Para apagarlo, pulse otra vez el micrófono. Si lo deja encendido, sigue activo al cambiar de pantalla.</li>
         </ol>
       </div>
@@ -130,9 +130,10 @@
         <div class="d-flex align-items-center gap-2 mb-2"><span class="icono"><i class="bi bi-volume-up"></i></span><span class="fw-semibold">Para tener en cuenta</span></div>
         <ul class="ayuda-lista small">
           <li>Funciona en <strong>Microsoft Edge</strong> o <strong>Google Chrome</strong> y necesita internet para entender las órdenes.</li>
-          <li>Lo que se dice sin la palabra «Sistema» se ignora. No se guarda ningún audio.</li>
+          <li>Lo que se dice sin la palabra clave se ignora. No se guarda ningún audio.</li>
+          <li>Por voz solo se abren las secciones que su rol puede ver; las pantallas de administración no se modifican por voz.</li>
           <li>Con la flecha junto al micrófono puede <strong>elegir y probar la voz</strong>. Las voces «Natural» de Edge son las más naturales.</li>
-          <li>Las acciones que cierran la práctica piden confirmación: «Sistema, confirmar» o «Sistema, cancelar».</li>
+          <li>Las acciones que cierran la práctica piden confirmación: «Asistente, confirmar» o «Asistente, cancelar». Para que deje de hablar: «Asistente, silencio».</li>
         </ul>
       </div>
     </div>
@@ -143,13 +144,13 @@
         <div class="fw-semibold mb-2">Durante la verificación</div>
         <table class="table table-sm tabla-estados small mb-0">
           <tbody>
-            <tr><td class="text-nowrap"><em>«Sistema, iniciar cámara»</em></td><td>Enciende la cámara para leer el QR (o la reanuda en la detección).</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, continuar»</em></td><td>Pasa a la verificación de EPP después de identificar al estudiante.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, otra vez»</em></td><td>Verificar de nuevo.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, registrar»</em></td><td>Registra el intento no conforme.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, siguiente»</em></td><td>Pasa al siguiente estudiante.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, detener»</em></td><td>Detiene la cámara.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, nueva práctica»</em></td><td>Muestra el resumen de la clase y pide confirmar.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, iniciar cámara»</em></td><td>Enciende la cámara para leer el QR (o la reanuda en la detección).</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, continuar»</em></td><td>Pasa a la verificación de EPP después de identificar al estudiante.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, otra vez»</em></td><td>Verificar de nuevo.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, registrar»</em></td><td>Registra el intento no conforme.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, siguiente»</em></td><td>Pasa al siguiente estudiante.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, detener»</em></td><td>Detiene la cámara.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, nueva práctica»</em></td><td>Muestra el resumen de la clase y pide confirmar.</td></tr>
           </tbody>
         </table>
       </div>
@@ -159,15 +160,17 @@
         <div class="fw-semibold mb-2">Para moverse por el sistema</div>
         <table class="table table-sm tabla-estados small mb-0">
           <tbody>
-            <tr><td class="text-nowrap"><em>«Sistema, ir a inicio»</em></td><td>Abre el dashboard.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, ir a verificación»</em></td><td>Abre la verificación en vivo.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, mis registros de hoy»</em></td><td>Abre sus registros del día.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, ir a registros / incidencias»</em></td><td>Abre esas pantallas.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, reincidentes»</em></td><td>Abre la lista de estudiantes reincidentes.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, ir a prácticas»</em></td><td>Abre los resúmenes de prácticas.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, volver»</em></td><td>Regresa a la pantalla anterior.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, cambiar voz»</em></td><td>Cambia la voz del asistente.</td></tr>
-            <tr><td class="text-nowrap"><em>«Sistema, ayuda»</em></td><td>El asistente dice los comandos disponibles.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, ir a inicio»</em></td><td>Abre el dashboard.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, ir a verificación»</em></td><td>Abre la verificación en vivo.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, mis registros de hoy»</em></td><td>Abre sus registros del día.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, ir a registros / incidencias»</em></td><td>Abre esas pantallas.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, reincidentes»</em></td><td>Abre la lista de estudiantes reincidentes.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, ir a prácticas»</em></td><td>Abre los resúmenes de prácticas.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, volver»</em></td><td>Regresa a la pantalla anterior.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, cambiar voz»</em></td><td>Cambia la voz del asistente.</td></tr>
+            {% if es_administrador %}<tr><td class="text-nowrap"><em>«Asistente, ir a laboratorios / usuarios / auditoría…»</em></td><td>Abre las secciones de administración (solo navegación).</td></tr>{% endif %}
+            <tr><td class="text-nowrap"><em>«Asistente, silencio»</em></td><td>Hace que el asistente deje de hablar.</td></tr>
+            <tr><td class="text-nowrap"><em>«Asistente, ayuda»</em></td><td>El asistente dice los comandos disponibles.</td></tr>
           </tbody>
         </table>
       </div>

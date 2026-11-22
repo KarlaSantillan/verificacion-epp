@@ -6,7 +6,6 @@
   .btn-voz.activo i { animation: pulso-mic 1.4s ease-in-out infinite; }
   @keyframes pulso-mic { 50% { opacity: .45; } }
   @media (prefers-reduced-motion: reduce) { .btn-voz.activo i { animation: none; } }
-  .estado-voz { max-width: 260px; }
   .voz-grupo { display: flex; align-items: center; gap: 2px; }
   .btn-voz-menu { width: 22px; height: 40px; border: 0; background: transparent; color: var(--epp-primary); border-radius: 8px; font-size: .75rem; }
   .btn-voz-menu:hover, .btn-voz-menu:focus-visible { background: var(--epp-soft); }
@@ -16,22 +15,18 @@
   .burbuja-voz::after { content: ""; position: absolute; right: -5px; top: 50%; transform: translateY(-50%); border: 6px solid transparent; border-left-color: var(--epp-primary); border-right: 0; }
   .burbuja-voz.ok { background: var(--epp-ok); } .burbuja-voz.ok::after { border-left-color: var(--epp-ok); }
   .burbuja-voz.duda { background: #6b7886; } .burbuja-voz.duda::after { border-left-color: #6b7886; }
+  .burbuja-voz.error { background: var(--epp-bad); } .burbuja-voz.error::after { border-left-color: var(--epp-bad); }
   .burbuja-voz .puntos::after { content: "…"; animation: puntos 1s steps(3, end) infinite; display: inline-block; width: 1em; overflow: hidden; vertical-align: bottom; }
   @keyframes puntos { from { width: 0; } to { width: 1em; } }
 </style>
-<span id="estadoVoz" class="estado-voz small text-truncate d-none d-md-inline" aria-live="polite"></span>
 <span id="burbujaVoz" class="burbuja-voz d-none" role="status" aria-live="assertive"></span>
+{{ voz_secciones|json_script:"voz-secciones" }}
+{{ voz_secciones_admin|json_script:"voz-secciones-admin" }}
 <div class="voz-grupo dropdown">
 <button id="btnVoz" type="button" class="btn-voz" aria-pressed="false"
-        title="Asistente de voz: diga «Sistema, …». Por ejemplo: «Sistema, ir a registros» o «Sistema, ayuda»."
+        title="Asistente de voz: diga la palabra clave y la orden. Por ejemplo: «Asistente, ir a registros»."
         data-docente="{{ user.nombres }}"
-        data-url-inicio="{% url 'core:inicio' %}"
-        data-url-verificacion="{% url 'verificacion:verificar' %}"
-        data-url-registros="{% url 'historial:registros' %}"
-        data-url-incidencias="{% url 'historial:incidencias' %}"
         data-url-reincidentes="{% url 'historial:incidencias' %}?tab=reincidentes"
-        data-url-practicas="{% url 'historial:practicas' %}"
-        data-url-ayuda="{% url 'core:ayuda' %}"
         data-url-hoy="{% url 'historial:registros' %}?desde={% now 'Y-m-d' %}&hasta={% now 'Y-m-d' %}&mios=1">
   <i class="bi bi-mic-mute"></i>
 </button>
@@ -43,5 +38,7 @@
   <p class="small text-muted-epp mb-2">Las voces «Natural» de Microsoft Edge son las más parecidas a una persona.</p>
   <select id="selectorVoz" class="form-select form-select-sm mb-2" aria-label="Voz del asistente"></select>
   <button type="button" id="btnProbarVoz" class="btn btn-sm btn-epp-outline w-100"><i class="bi bi-volume-up me-1"></i>Probar voz</button>
+  <hr class="my-3">
+  <p class="small text-muted-epp mb-0">Diga <strong>«Asistente»</strong> antes de cada orden. Ejemplo: «Asistente, ir a registros».</p>
 </div>
 </div>
