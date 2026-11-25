@@ -15,6 +15,24 @@
   <link rel="icon" href="{% static 'img/favicon-32.png' %}" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
   <link href="{% static 'css/navegacion.css' %}?v=1" rel="stylesheet">
+  <style>
+    /* Selección de perfil (SGA+). Estilos locales para no tocar las hojas compartidas. */
+    .paso { display: none; }
+    .paso.activa { display: block; }
+    .btn-perfil {
+      display: flex; align-items: center; gap: 1rem; width: 100%; text-align: left;
+      background: #fff; border: 1.5px solid #D6DFE8; border-radius: 12px; padding: 1rem 1.15rem;
+      transition: border-color .15s, box-shadow .15s, transform .05s;
+    }
+    .btn-perfil:hover { border-color: #FB7E00; box-shadow: 0 4px 14px rgba(28, 50, 71, .08); }
+    .btn-perfil:active { transform: translateY(1px); }
+    .btn-perfil:focus-visible { outline: 2px solid #FB7E00; outline-offset: 2px; }
+    .perfil-ico {
+      flex: 0 0 auto; width: 46px; height: 46px; border-radius: 10px;
+      background: #F1F5F8; color: #1C3247; display: inline-flex; align-items: center;
+      justify-content: center; font-size: 1.35rem;
+    }
+  </style>
 </head>
 <body>
 <div class="container-fluid">
@@ -51,52 +69,134 @@
       <p class="d-none d-md-block small text-muted-epp mb-0">Las cuentas autorizadas las administra el responsable del sistema.</p>
     </div>
 
-    <!-- Formulario -->
+    <!-- Columna de acceso -->
     <div class="col-md-6 d-flex align-items-center justify-content-center px-4 py-5">
       <div class="w-100 login-panel">
-        <h1 class="fs-2 fw-semibold text-heading">Iniciar sesión</h1>
-        <p class="small text-muted-epp">Acceso para docentes/encargados y administradores.</p>
 
-        <form method="post" class="mt-4 d-flex flex-column gap-3" data-loading="Verificando…" novalidate>
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{{ next }}">
+        <!-- Paso 1: selección de perfil -->
+        <div id="paso-perfiles" class="paso">
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <span style="width:4px; height:20px; background:#FB7E00; display:inline-block; border-radius:2px;"></span>
+            <h1 class="fs-4 fw-semibold text-heading mb-0">Perfiles</h1>
+          </div>
+          <p class="small text-muted-epp">Seleccione su perfil para iniciar sesión.</p>
 
-          {% if form.non_field_errors %}
-            <div class="aviso aviso-error d-flex gap-2" role="alert">
-              <i class="bi bi-exclamation-octagon"></i>
-              <div>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>
-            </div>
-          {% endif %}
+          <div class="d-flex flex-column gap-3 mt-3">
+            <button type="button" class="btn-perfil" data-perfil="docente" data-perfil-nombre="Docente/Encargado">
+              <span class="perfil-ico"><i class="bi bi-easel2"></i></span>
+              <span>
+                <span class="d-block fw-semibold text-heading">Docente/Encargado</span>
+                <span class="d-block small text-muted-epp">Acceso a la verificación y a sus registros.</span>
+              </span>
+              <i class="bi bi-chevron-right ms-auto text-muted-epp"></i>
+            </button>
 
-          <div>
-            <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-            {{ form.username }}
-            {% for error in form.username.errors %}<div class="small text-danger mt-1">{{ error }}</div>{% endfor %}
+            <button type="button" class="btn-perfil" data-perfil="administrador" data-perfil-nombre="Administrador">
+              <span class="perfil-ico"><i class="bi bi-gear-wide-connected"></i></span>
+              <span>
+                <span class="d-block fw-semibold text-heading">Administrador</span>
+                <span class="d-block small text-muted-epp">Gestión del sistema, usuarios y catálogos.</span>
+              </span>
+              <i class="bi bi-chevron-right ms-auto text-muted-epp"></i>
+            </button>
           </div>
 
-          <div>
-            <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
-            <div class="input-group">
-              {{ form.password }}
-              <button type="button" class="btn btn-epp-outline" data-toggle-password="{{ form.password.id_for_label }}" aria-label="Mostrar contraseña">
-                <i class="bi bi-eye"></i>
-              </button>
-            </div>
-            {% for error in form.password.errors %}<div class="small text-danger mt-1">{{ error }}</div>{% endfor %}
+          <div class="aviso aviso-info mt-4 small">
+            <i class="bi bi-info-circle me-1"></i>
+            El estudiante no inicia sesión: se identifica con su carné QR durante la verificación.
           </div>
-
-          <button type="submit" class="btn btn-epp w-100 py-2 mt-2">Iniciar sesión</button>
-        </form>
-
-        <div class="aviso aviso-info mt-4 small">
-          <i class="bi bi-info-circle me-1"></i>
-          ¿No tienes cuenta o la olvidaste? Solicítala al administrador del sistema.
         </div>
+
+        <!-- Paso 2: formulario de inicio de sesión -->
+        <div id="paso-form" class="paso">
+          <button type="button" id="btn-cambiar-perfil" class="btn btn-sm btn-epp-outline mb-3">
+            <i class="bi bi-arrow-left me-1"></i>Cambiar perfil
+          </button>
+          <h1 class="fs-2 fw-semibold text-heading">Iniciar sesión</h1>
+          <p class="small text-muted-epp">Perfil: <span id="perfil-nombre" class="fw-semibold text-heading">—</span></p>
+
+          <form method="post" class="mt-3 d-flex flex-column gap-3" data-loading="Verificando…" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {{ form.perfil }}
+
+            {% if form.non_field_errors %}
+              <div class="aviso aviso-error d-flex gap-2" role="alert">
+                <i class="bi bi-exclamation-octagon"></i>
+                <div>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>
+              </div>
+            {% endif %}
+
+            <div>
+              <label class="form-label" for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+              {{ form.username }}
+              {% for error in form.username.errors %}<div class="small text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div>
+              <label class="form-label" for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+              <div class="input-group">
+                {{ form.password }}
+                <button type="button" class="btn btn-epp-outline" data-toggle-password="{{ form.password.id_for_label }}" aria-label="Mostrar contraseña">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              {% for error in form.password.errors %}<div class="small text-danger mt-1">{{ error }}</div>{% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-end">
+              <a href="{% url 'usuarios:password_reset' %}" class="small text-decoration-none">¿Olvidó su contraseña?</a>
+            </div>
+
+            <button type="submit" class="btn btn-epp w-100 py-2 mt-1">Iniciar sesión</button>
+          </form>
+        </div>
+
       </div>
     </div>
 
   </div>
 </div>
 <script src="{% static 'js/epp.js' %}"></script>
+<script>
+  (function () {
+    var pasoPerfiles = document.getElementById('paso-perfiles');
+    var pasoForm = document.getElementById('paso-form');
+    var inputPerfil = document.querySelector('form [name="perfil"]');
+    var nombre = document.getElementById('perfil-nombre');
+    var usuario = document.getElementById('{{ form.username.id_for_label }}');
+    var mapa = { docente: 'Docente/Encargado', administrador: 'Administrador' };
+
+    function mostrar(paso) {
+      pasoPerfiles.classList.toggle('activa', paso === 'perfiles');
+      pasoForm.classList.toggle('activa', paso === 'form');
+    }
+    function elegir(valor, texto) {
+      if (inputPerfil) inputPerfil.value = valor;
+      if (nombre) nombre.textContent = texto;
+      mostrar('form');
+      if (usuario) { try { usuario.focus(); } catch (e) {} }
+    }
+
+    document.querySelectorAll('.btn-perfil').forEach(function (b) {
+      b.addEventListener('click', function () { elegir(b.dataset.perfil, b.dataset.perfilNombre); });
+    });
+    var volver = document.getElementById('btn-cambiar-perfil');
+    if (volver) volver.addEventListener('click', function () {
+      if (inputPerfil) inputPerfil.value = '';
+      mostrar('perfiles');
+    });
+
+    // Estado inicial: si hubo error o ya se había elegido un perfil, mostrar el formulario.
+    var inicio = {% if form.errors or form.perfil.value %}'form'{% else %}'perfiles'{% endif %};
+    if (inicio === 'form') {
+      var v = inputPerfil ? inputPerfil.value : '';
+      if (v && nombre) nombre.textContent = mapa[v] || '—';
+      mostrar('form');
+    } else {
+      mostrar('perfiles');
+    }
+  }());
+</script>
 </body>
 </html>

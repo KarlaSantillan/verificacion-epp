@@ -1,0 +1,94 @@
+{% load static %}<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Verificación EPP{% endblock %}</title>
+  <link rel="preload" href="{% static 'vendor/inter/inter-latin-400-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'vendor/inter/inter-latin-600-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link href="{% static 'vendor/inter/inter.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/epp.css' %}" rel="stylesheet">
+  <link rel="icon" href="{% static 'img/favicon.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'img/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <link href="{% static 'css/navegacion.css' %}?v=1" rel="stylesheet">
+  <style>
+    /* Panel lateral con fondo de marca, para que la tarjeta blanca resalte. */
+    .auth-aside {
+      background:
+        radial-gradient(1200px 400px at 110% -10%, rgba(251, 126, 0, .22), transparent 60%),
+        linear-gradient(160deg, #1c3247 0%, #16293a 55%, #12222f 100%);
+      color: #fff; position: relative; overflow: hidden;
+    }
+    .auth-aside .brand-title, .auth-aside .text-heading { color: #fff; }
+    .auth-aside .brand-sub, .auth-aside .text-muted-epp { color: rgba(255, 255, 255, .72) !important; }
+    .auth-aside .ilustracion { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .12); border-radius: 18px; }
+    .auth-aside .chip-seg { display: inline-flex; align-items: center; gap: .4rem; font-size: .8rem; color: #fff;
+      background: rgba(255, 255, 255, .1); border: 1px solid rgba(255, 255, 255, .16); border-radius: 999px; padding: .35rem .75rem; }
+
+    /* Tarjeta del formulario: elevada, con franja de acento superior. */
+    .auth-card {
+      max-width: 430px; width: 100%; background: #fff; border: 1px solid var(--epp-neutral);
+      border-radius: 18px; box-shadow: 0 16px 40px rgba(28, 50, 71, .12); padding: 2.25rem 2rem; position: relative; overflow: hidden;
+    }
+    .auth-card::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: linear-gradient(90deg, var(--epp-accent), #ffc987); }
+    .auth-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--epp-accent); }
+    .icono-estado { display: inline-grid; place-items: center; width: 58px; height: 58px; border-radius: 16px;
+      background: var(--epp-accent-soft); color: var(--epp-accent); font-size: 1.6rem; border: 1px solid #ffdcb3; }
+  </style>
+</head>
+<body>
+<div class="container-fluid">
+  <div class="row min-vh-100">
+
+    <!-- Panel lateral de marca -->
+    <div class="col-md-6 auth-aside d-flex flex-column justify-content-between gap-4 px-4 px-md-5 py-4 py-md-5">
+      <div class="d-flex align-items-center gap-3">
+        <span class="brand-logo"><i class="bi bi-shield-check"></i></span>
+        <div>
+          <div class="brand-title fs-5">Verificación EPP</div>
+          <div class="brand-sub fs-6">Laboratorios de Biotecnología · UNEMI</div>
+        </div>
+      </div>
+
+      <div class="d-none d-md-block">
+        <div class="ilustracion p-4 mx-auto" style="max-width: 24rem;">
+          <svg viewBox="0 0 360 230" class="d-block w-100" aria-hidden="true">
+            <rect x="60" y="24" width="240" height="150" rx="16" fill="rgba(255,255,255,.08)" stroke="rgba(255,255,255,.22)" stroke-width="2"/>
+            <circle cx="180" cy="86" r="30" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+            <rect x="166" y="74" width="28" height="22" rx="4" fill="none" stroke="#fb7e00" stroke-width="3"/>
+            <path d="M172 74v-6a8 8 0 0 1 16 0v6" fill="none" stroke="#fb7e00" stroke-width="3"/>
+            <path d="M120 150c8-26 30-40 60-40s52 14 60 40" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+            <g transform="translate(238 120)">
+              <path d="M46 0 8 15v32c0 25 17 42 38 51 21-9 38-26 38-51V15Z" fill="rgba(251,126,0,.18)" stroke="#fb7e00" stroke-width="2.5"/>
+              <path d="m30 50 12 12 22-24" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </svg>
+        </div>
+        <h2 class="mt-4 fs-3 fw-semibold text-heading">Acceso seguro al sistema de verificación de EPP</h2>
+        <p class="text-muted-epp" style="max-width: 28rem">Las cuentas de docentes y administradores protegen el registro de validaciones, correcciones y reportes de los laboratorios.</p>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <span class="chip-seg"><i class="bi bi-lock"></i> Enlace cifrado</span>
+          <span class="chip-seg"><i class="bi bi-clock-history"></i> Caduca por seguridad</span>
+          <span class="chip-seg"><i class="bi bi-envelope-check"></i> Aviso al correo</span>
+        </div>
+      </div>
+
+      <p class="d-none d-md-block small text-muted-epp mb-0">Las cuentas autorizadas las administra el responsable del sistema.</p>
+    </div>
+
+    <!-- Tarjeta del formulario -->
+    <div class="col-md-6 d-flex align-items-center justify-content-center px-3 px-md-5 py-5">
+      <div class="auth-card">
+        {% block contenido %}{% endblock %}
+      </div>
+    </div>
+
+  </div>
+</div>
+<script src="{% static 'js/epp.js' %}"></script>
+</body>
+</html>
